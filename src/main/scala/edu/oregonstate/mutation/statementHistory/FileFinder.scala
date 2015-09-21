@@ -27,4 +27,12 @@ class FileFinder(repo: String) {
     val nextCommit = walk.next
     return nextCommit.getName
   }
+
+  def findAll(path: String): Seq[String] = {
+    import scala.collection.JavaConversions
+    
+    val walk = createWalkWithFilter(path)
+    val seq = JavaConversions.asScalaIterator(walk.iterator).toArray.toSeq
+    seq.map { commit => commit.getName } toSeq
+	}
 }

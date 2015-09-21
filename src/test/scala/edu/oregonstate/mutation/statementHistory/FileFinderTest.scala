@@ -24,4 +24,12 @@ class FileFinderTest extends GitTest {
      commit.getName should equal (sha)
   }
 
+  it should "find both occurances" in {
+    val first = add("A.java", "public class A{}")
+    val second = add("A.java", "public class A{public void m(){}}")
+    val expectedList = Seq(first getName, second getName)
+    val all = fileFinder.findAll("A.java")
+    all should have size 2
+    all should equal (expectedList)
+  }
 }
