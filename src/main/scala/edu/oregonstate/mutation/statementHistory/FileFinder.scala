@@ -11,7 +11,7 @@ class FileFinder(repo: String) {
   
 	val git = Git.open(new File(repo))
 
-  def findFirst(path: String): String = {
+  def createWalkWithFilter(path: String) = {
     val walk = new RevWalk(git.getRepository)
     val treeFilter = PathFilter.create(path)
     walk.setTreeFilter(treeFilter)
@@ -19,6 +19,11 @@ class FileFinder(repo: String) {
     walk.sort(RevSort.COMMIT_TIME_DESC, true)
     walk.sort(RevSort.REVERSE, true)
     walk.markStart(CommitUtils.getCommit(git.getRepository, "HEAD"))
+    walk
+  }
+
+  def findFirst(path: String): String = {
+    val walk = createWalkWithFilter(path)
     val nextCommit = walk.next
     return nextCommit.getName
   }
