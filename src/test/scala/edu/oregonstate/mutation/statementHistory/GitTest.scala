@@ -12,19 +12,20 @@ import java.nio.file.Paths
 import org.eclipse.jgit.lib.PersonIdent
 import org.scalatest.Matchers
 import org.eclipse.jgit.revwalk.RevCommit
+import org.scalatest.BeforeAndAfterEach
 
 
-trait GitTest extends FlatSpec with BeforeAndAfter with Matchers {
+trait GitTest extends FlatSpec with BeforeAndAfterEach with Matchers {
   
   var repo: File = _
   val author = new PersonIdent("Test Person", "test@example.com")
   
-  before {
+  override def beforeEach = {
     repo = initRepo
     repo should not be (null)
   }
   
-  after {
+  override def afterEach {
     repo.delete
   }
   
