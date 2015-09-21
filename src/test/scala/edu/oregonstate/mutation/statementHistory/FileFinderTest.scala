@@ -1,7 +1,5 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.scalatest.FlatSpec
-
 class FileFinderTest extends GitTest {
   
   var fileFinder: FileFinder = _
@@ -27,6 +25,16 @@ class FileFinderTest extends GitTest {
   it should "find both occurances" in {
     val first = add("A.java", "public class A{}")
     val second = add("A.java", "public class A{public void m(){}}")
+    val expectedList = Seq(first getName, second getName)
+    val all = fileFinder.findAll("A.java")
+    all should have size 2
+    all should equal (expectedList)
+  }
+  
+  it should "find both occurances in more than two commits" in {
+    val first = add("A.java", "public class A{}")
+ 		add("B.java", "public class B{}")
+    val second = add("A.java", "public class B{}")
     val expectedList = Seq(first getName, second getName)
     val all = fileFinder.findAll("A.java")
     all should have size 2
