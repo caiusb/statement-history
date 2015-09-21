@@ -47,7 +47,8 @@ class FileFinder(repo: String) {
     walk.markUninteresting(first)
     
     val iterator = asScalaIterator(walk.iterator)
-    val shas = iterator.filter { commit => {
+    
+    def ifCommitChangesFile(commit: RevCommit) = {
       val diff = new DiffFormatter(DisabledOutputStream.INSTANCE)
       diff.setRepository(git.getRepository)
       diff.setDiffComparator(RawTextComparator.DEFAULT)
@@ -58,8 +59,9 @@ class FileFinder(repo: String) {
       val diffs = diff.scan(secondTree, commit.getTree)
       val result = diffs.filter { diff => diff.getNewPath.equals(path) || diff.getOldPath.equals(path) }
       result.size != 0
-    } }
-    .map { commit => commit.getName }
+    }
+    
+    val shas = iterator.filter(ifCommitChangesFile).map { commit => commit.getName }
     
     return shas.toSeq
 	}
