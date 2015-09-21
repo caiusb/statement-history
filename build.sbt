@@ -14,5 +14,6 @@ mainClass in Compile := Some("edu.oregonstate.mutation.statementHistory.Main")
 
 lazy val root = (project in file(".")).
   settings(
-    name := "statement-history"
+    name := "statement-history",
+    version := "0.1"
   )
