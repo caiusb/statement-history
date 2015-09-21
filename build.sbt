@@ -6,7 +6,7 @@ libraryDependencies ++= Seq(
 	"com.github.gumtreediff" % "gen.jdt" % "2.0.0"
 )
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % Test
+libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
 lazy val root = (project in file(".")).
 	settings(
