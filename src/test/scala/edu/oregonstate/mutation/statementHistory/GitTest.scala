@@ -43,6 +43,9 @@ trait GitTest extends FlatSpec with BeforeAndAfterEach with Matchers {
   }
   
   private def createFile(filename: String, content: String) = {
+    val file = new File(repo.getAbsolutePath, filename)
+    if (!file.getParentFile.exists)
+      file.getParentFile.mkdirs
     val path = repo.getAbsolutePath
     val writer = new PrintWriter(Paths.get(path, filename).toAbsolutePath.toString)
     writer should not be null
