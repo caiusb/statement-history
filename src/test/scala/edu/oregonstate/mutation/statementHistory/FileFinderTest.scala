@@ -13,14 +13,14 @@ class FileFinderTest extends GitTest {
   
   it should "find the file" in {
     val commit = add("A.java", "public class A{}")
-    val sha = fileFinder.findFirst("A.java")
+    val sha = fileFinder.findFirst("A.java").getName
     commit.getName should equal (sha)
   }
   
   it should "find the file in more than one commit" in {
      add("B.java", "public class B{]")
      val commit = add("A.java", "public class A{}")
-     val sha = fileFinder.findFirst("A.java")
+     val sha = fileFinder.findFirst("A.java").getName
      commit.getName should equal (sha)
   }
 

@@ -22,11 +22,12 @@ class FileFinder(repo: String) {
     walk
   }
 
-  def findFirst(path: String): String = {
-    val walk = createWalkWithFilter(path)
-    val nextCommit = walk.next
-    return nextCommit.getName
-  }
+	def findFirst(path: String): RevCommit = {
+			val walk = createWalkWithFilter(path)
+			val nextCommit = walk.next
+			walk.close
+			nextCommit
+	}
 
   def findAll(path: String): Seq[String] = {
     import scala.collection.JavaConversions
