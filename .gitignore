@@ -5,3 +5,5 @@ target/
 /bin/
 .cache-tests
 .cache-main
+.idea_modules
+.idea
