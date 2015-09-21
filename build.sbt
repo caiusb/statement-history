@@ -10,6 +10,8 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
+mainClass in Compile := Some("edu.oregonstate.mutation.statementHistory.Main")
+
 lazy val root = (project in file(".")).
   settings(
     name := "statement-history"
