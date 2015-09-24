@@ -35,4 +35,25 @@ class StatementChangeDetectorTest extends GitTest {
     commits should have size 3
     commits should equal (expected)
   }
+
+  it should "find a statement if another one was added" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("A.java", "public class A{\npublic void m(){\nint y=33;\nint x=2;\n}\n}")
+    val expected = Seq(first getName, second getName)
+
+    val commits = new StatementChangeDetector(repo getAbsolutePath).findCommits("A.java", 3)
+    commits should have size 2
+    commits should equal (expected)
+  }
+
+  it should "know if something was deleted" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("A.java", "public class A{\npublic void m(){}\n}")
+    add("A.java", "public class A{\npublic void m(){}\npublic void n(){}}")
+    val expected = Seq(first getName, second getName)
+
+    val commits = new StatementChangeDetector(repo getAbsolutePath).findCommits("A.java", 3)
+    commits should have size 2
+    commits should equal (expected)
+  }
 }
