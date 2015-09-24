@@ -48,6 +48,7 @@ class StatementFinder(repo: String) {
     val parser = newParser(K_COMPILATION_UNIT)
     parser.setKind(JLS8)
     parser.setSource(content.toCharArray)
+    parser.setResolveBindings(true)
     parser.createAST(new NullProgressMonitor)
   }
 }
