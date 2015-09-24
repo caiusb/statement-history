@@ -26,7 +26,7 @@ class StatementFinder(repo: String) {
   def findStatement(commitSHA: String, file: String, lineNumber: Int): Statement = {
     val content: String = getFileContent(commitSHA, file)
     val ast: ASTNode = getAST(content)
-    return findStatement(lineNumber, content, ast)
+    findStatement(lineNumber, content, ast)
   }
 
   def getFileContent(commitSHA: String, file: String): String = {
