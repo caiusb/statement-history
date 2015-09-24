@@ -14,7 +14,6 @@ class StatementFinder(repo: String) {
   val git = Git.open(new File(repo))
 
   def getLines(string: String): Seq[LineInfo] = {
-    import scala.collection.mutable._
     val lines = string.split("\n")
     var current = 0
     lines.map { line => {
@@ -25,24 +24,30 @@ class StatementFinder(repo: String) {
   }
 
   def findStatement(commitSHA: String, file: String, lineNumber: Int): Statement = {
-
-    val content = BlobUtils.getContent(git.getRepository, commitSHA, file)
+    val content: String = getFileContent(commitSHA, file)
     val ast: ASTNode = getAST(content)
+    return findStatement(lineNumber, content, ast)
+  }
+
+  def getFileContent(commitSHA: String, file: String): String = {
+    BlobUtils.getContent(git.getRepository, commitSHA, file)
+  }
+
+  def findStatement(lineNumber: Int, content: String, ast: ASTNode): Statement = {
     val lines = getLines(content)
     val visitor = new StatementVisitor(lines)
     ast.accept(visitor)
-    visitor.getStatementMap.get(lineNumber-1) match {
+    visitor.getStatementMap.get(lineNumber - 1) match {
       case Some(x) => return x
       case None => return null
     }
   }
 
-  private def getAST(content: String): ASTNode = {
+  def getAST(content: String): ASTNode = {
     import org.eclipse.jdt.core.dom.ASTParser._
     val parser = newParser(K_COMPILATION_UNIT)
     parser.setKind(JLS8)
     parser.setSource(content.toCharArray)
-    val ast = parser.createAST(new NullProgressMonitor)
-    ast
+    parser.createAST(new NullProgressMonitor)
   }
 }
