@@ -16,9 +16,13 @@ class StatementVisitor() extends ASTVisitor {
     statementMap(line) = node
     return false
   }
-  
-  override def visit(node: VariableDeclarationStatement):Boolean = {
+
+  override def visit(node: AssertStatement): Boolean =
     visitStatement(node)
-  }
-  
+
+  override def visit(node: VariableDeclarationStatement): Boolean =
+    visitStatement(node)
+
+  override def visit(node: ConstructorInvocation): Boolean =
+    visitStatement(node)
 }

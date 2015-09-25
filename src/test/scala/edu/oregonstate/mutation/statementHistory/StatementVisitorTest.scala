@@ -33,4 +33,7 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   it should "find a variable declaration" in
     checkStatement("int x=3;")
+
+  it should "find a constructor invocation" in
+    checkStatement("Object x = new Object();")
 }
