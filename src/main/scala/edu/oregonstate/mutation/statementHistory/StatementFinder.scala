@@ -1,13 +1,10 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.eclipse.jdt.core.dom.{ASTNode, Statement}
-import org.eclipse.jdt.core.dom.AST._
-import org.gitective.core.CommitUtils
-import org.eclipse.jgit.lib.Repository
 import java.io.File
+
+import org.eclipse.jdt.core.dom.{ASTNode, Statement}
 import org.eclipse.jgit.api.Git
 import org.gitective.core.BlobUtils
-import org.eclipse.core.runtime.NullProgressMonitor
 
 class StatementFinder(repo: String) {
 
@@ -25,7 +22,7 @@ class StatementFinder(repo: String) {
 
   def findStatement(commitSHA: String, file: String, lineNumber: Int): Statement = {
     val content: String = getFileContent(commitSHA, file)
-    val ast: ASTNode = getAST(content)
+    val ast: ASTNode = AST.getAST(content)
     findStatement(lineNumber, content, ast)
   }
 
@@ -41,14 +38,5 @@ class StatementFinder(repo: String) {
       case Some(x) => return x
       case None => return null
     }
-  }
-
-  def getAST(content: String): ASTNode = {
-    import org.eclipse.jdt.core.dom.ASTParser._
-    val parser = newParser(K_COMPILATION_UNIT)
-    parser.setKind(JLS8)
-    parser.setSource(content.toCharArray)
-    parser.setResolveBindings(true)
-    parser.createAST(new NullProgressMonitor)
   }
 }
