@@ -10,16 +10,6 @@ class StatementFinder(repo: String) {
 
   val git = Git.open(new File(repo))
 
-  def getLines(string: String): Seq[LineInfo] = {
-    val lines = string.split("\n")
-    var current = 0
-    lines.map { line => {
-      val lineInfo = new LineInfo(current+1, current+line.length())
-      current += line.length()
-      lineInfo
-    } }
-  }
-
   def findStatement(commitSHA: String, file: String, lineNumber: Int): Statement = {
     val content: String = getFileContent(commitSHA, file)
     val ast: ASTNode = AST.getAST(content)
@@ -31,8 +21,7 @@ class StatementFinder(repo: String) {
   }
 
   def findStatement(lineNumber: Int, content: String, ast: ASTNode): Statement = {
-    val lines = getLines(content)
-    val visitor = new StatementVisitor(lines)
+    val visitor = new StatementVisitor()
     ast.accept(visitor)
     visitor.getStatementMap.get(lineNumber - 1) match {
       case Some(x) => return x

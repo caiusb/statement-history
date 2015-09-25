@@ -2,7 +2,7 @@ package edu.oregonstate.mutation.statementHistory
 
 import org.eclipse.jdt.core.dom._
 
-class StatementVisitor(lineInfo: Seq[LineInfo]) extends ASTVisitor {
+class StatementVisitor() extends ASTVisitor {
   
   val statementMap = scala.collection.mutable.Map[Int, Statement]()
   
@@ -12,8 +12,8 @@ class StatementVisitor(lineInfo: Seq[LineInfo]) extends ASTVisitor {
   
   def visitStatement(node: Statement):Boolean = {
     val startPosition = node.getStartPosition
-    val statementLines = lineInfo.indices.filter { i => lineInfo(i).contains(startPosition) }
-    statementMap(statementLines(0)) = node
+    val line = node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(startPosition) - 1
+    statementMap(line) = node
     return false
   }
   
