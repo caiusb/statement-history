@@ -1,5 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
+import org.eclipse.jdt.core.dom.Statement
 import org.scalatest._
 import AST._
 
@@ -15,11 +16,21 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
     "public class A {\npublic void m(){\n" + statement + "}}"
   }
 
-  it should "find a variable declaration" in {
-    val stmt = putStatementInCU("int x=3;")
-    getAST(stmt).accept(visitor)
+  private def getStatementMap(stmt: String): Map[Int, Statement] = {
+    val cu = putStatementInCU(stmt)
+    getAST(cu).accept(visitor)
     val stmtMap = visitor.getStatementMap
+    stmtMap
+  }
+
+  def checkStatement(stmt: String): Unit =
+    assertStatement(getStatementMap(stmt))
+
+  def assertStatement(stmtMap: Map[Int, Statement]): Unit = {
     stmtMap should have size 1
     stmtMap(2) should not be null
   }
+
+  it should "find a variable declaration" in
+    checkStatement("int x=3;")
 }
