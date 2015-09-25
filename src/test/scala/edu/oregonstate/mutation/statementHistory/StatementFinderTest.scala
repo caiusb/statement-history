@@ -8,5 +8,4 @@ class StatementFinderTest extends GitTest {
     val statement = finder.findStatement(commit.getName, "A.java", 3)
     statement should not be (null)
   }
-  
 }
