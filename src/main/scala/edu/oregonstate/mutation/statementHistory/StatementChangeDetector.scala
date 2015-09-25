@@ -42,7 +42,10 @@ class StatementChangeDetector(repo: String) {
             case x: Update => val node = x.getNode.asInstanceOf[JdtTree]
               val jdtNode = matchings.getDst(node).asInstanceOf[JdtTree].getContainedNode
               val startPosition = jdtNode.getStartPosition
-              line = jdtNode.getRoot.asInstanceOf[CompilationUnit].getLineNumber(startPosition)
+              jdtNode.getRoot match {
+                case n: CompilationUnit => line = n.getLineNumber(startPosition)
+                case _ => line = -1
+              }
           }
         case _ => ;
       }
