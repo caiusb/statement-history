@@ -23,7 +23,7 @@ class StatementChangeDetector(repo: String) {
     val finder = new StatementFinder(repo)
 
     commitsOfFile.reduce((left, right) => {
-      if (line == -1)
+      if (line == -1)  //TODO: I do not like this hack. I need fo find a nicer way to solve this
         return validCommits
 
       val diff = new ASTDiff
