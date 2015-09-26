@@ -15,7 +15,7 @@ object Main {
     val detector = new StatementChangeDetector(repo)
     val mutants = JSONDecoder.decode(new File(jsonFile))
 
-    val result = mutants.map(mutant => {
+    val result = mutants.toParArray.map(mutant => {
       mutant.getFileName + "," + mutant.getLineNumber + "," +
         detector.findCommits(mutant.getFileName, mutant.getLineNumber).map(commit => commit + ", ")
     })
