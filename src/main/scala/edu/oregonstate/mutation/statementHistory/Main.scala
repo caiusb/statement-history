@@ -6,7 +6,7 @@ import java.util.logging.Level
 import fr.labri.gumtree.matchers.Matcher
 
 object Main {
-  def main(args: Array[String]) {
+  def main(args: Array[String]) = {
     val repo = args(0)
     var jsonFile = args(1)
 
