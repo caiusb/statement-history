@@ -2,7 +2,7 @@ package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
 
-import fr.labri.gumtree.actions.model.{Delete, Update}
+import fr.labri.gumtree.actions.model.{Move, Delete, Update}
 import fr.labri.gumtree.gen.jdt.JdtTree
 import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit, Statement}
 import org.eclipse.jgit.api.Git
@@ -42,7 +42,7 @@ class StatementChangeDetector(repo: String) {
         case Some(x) => validCommits = validCommits :+ right
           x match {
             case x: Delete => line = -1 // Stop tracking
-            case x: Update => val node = x.getNode.asInstanceOf[JdtTree]
+            case _: Update | _: Move => val node = x.getNode.asInstanceOf[JdtTree]
               val jdtNode = matchings.getDst(node).asInstanceOf[JdtTree].getContainedNode
               val startPosition = jdtNode.getStartPosition
               jdtNode.getRoot match {
