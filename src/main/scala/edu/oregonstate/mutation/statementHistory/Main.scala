@@ -17,7 +17,7 @@ object Main {
 
     val result = mutants.toParArray.map(mutant => {
       mutant.getFileName + "," + mutant.getLineNumber + "," +
-        detector.findCommits(mutant.getFileName, mutant.getLineNumber).map(commit => commit + ", ")
+        detector.findCommits(mutant.getFileName, mutant.getLineNumber).map(commit => commit + ", ") + "\n"
     })
 
     print(result)
