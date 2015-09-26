@@ -1,11 +1,16 @@
 package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
+import java.util.logging.Level
+
+import fr.labri.gumtree.matchers.Matcher
 
 object Main {
   def main(args: Array[String]) {
     val repo = args(0)
     var jsonFile = args(1)
+
+    disableLoggers()
 
     val detector = new StatementChangeDetector(repo)
     val mutants = JSONDecoder.decode(new File(jsonFile))
@@ -16,5 +21,9 @@ object Main {
     })
 
     print(result)
+  }
+
+  def disableLoggers() = {
+    Matcher.LOGGER.setLevel(Level.OFF)
   }
 }
