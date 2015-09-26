@@ -56,4 +56,14 @@ class StatementChangeDetectorTest extends GitTest {
     commits should have size 2
     commits should equal (expected)
   }
+
+  it should "find the commit with a partial path" in {
+    val first = add("src/A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("src/A.java", "public class A{\npublic void m(){}\n}")
+    val expected = Seq(first getName, second getName)
+
+    val commits = new StatementChangeDetector(repo getAbsolutePath).findCommits("A.java", 3)
+    commits should have size 2
+    commits should equal (expected)
+  }
 }
