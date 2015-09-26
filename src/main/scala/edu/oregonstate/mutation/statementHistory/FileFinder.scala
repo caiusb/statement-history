@@ -1,13 +1,12 @@
 package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
+import java.util
 
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.diff.{DiffFormatter, RawTextComparator}
-import org.eclipse.jgit.revwalk.{RevCommit, RevSort, RevTree, RevWalk}
-import org.eclipse.jgit.treewalk.TreeWalk
-import org.eclipse.jgit.treewalk.filter.{PathSuffixFilter, PathFilter, TreeFilter}
-import org.eclipse.jgit.util.io.DisabledOutputStream
+import org.eclipse.jgit.diff.DiffEntry
+import org.eclipse.jgit.revwalk.{RevCommit, RevSort, RevWalk}
+import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 import org.gitective.core.CommitUtils
 
 class FileFinder(repo: String) {
@@ -33,8 +32,9 @@ class FileFinder(repo: String) {
 	}
 
   def findAll(path: String): Seq[String] = {
-    import scala.collection.JavaConversions._;
-    
+    import GitUtil._
+    import scala.collection.JavaConversions._
+
     val first = findFirst(path)
     val walk = new RevWalk(git.getRepository)
     walk.sort(RevSort.NONE)
@@ -44,16 +44,9 @@ class FileFinder(repo: String) {
     walk.markUninteresting(first)
     
     val iterator = asScalaIterator(walk.iterator)
-    
+
     def ifCommitChangesFile(commit: RevCommit) = {
-      val diff = new DiffFormatter(DisabledOutputStream.INSTANCE)
-      diff.setRepository(git.getRepository)
-      diff.setDiffComparator(RawTextComparator.DEFAULT)
-      diff.setDetectRenames(true)
-      var secondTree:RevTree = null
-      if (commit.getParentCount != 0)
-        secondTree = commit.getParent(0).getTree
-      val diffs = diff.scan(secondTree, commit.getTree)
+      val diffs: util.List[DiffEntry] = getDiffs(git, commit)
       val result = diffs.filter { diff => diff.getNewPath.endsWith(path) || diff.getOldPath.endsWith(path) }
       result.size != 0
     }
@@ -62,4 +55,6 @@ class FileFinder(repo: String) {
     
     return shas.toSeq
 	}
+
+
 }
