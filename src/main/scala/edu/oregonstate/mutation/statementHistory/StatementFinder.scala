@@ -17,7 +17,10 @@ class StatementFinder(repo: String) {
   }
 
   def getFileContent(commitSHA: String, file: String): String = {
-    BlobUtils.getContent(git.getRepository, commitSHA, file)
+    BlobUtils.getContent(git.getRepository, commitSHA, file) match {
+      case x: Any => x
+      case null => ""
+    }
   }
 
   def findStatement(lineNumber: Int, content: String, ast: ASTNode): Statement = {
