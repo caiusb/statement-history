@@ -66,4 +66,16 @@ class StatementChangeDetectorTest extends GitTest {
     commits should have size 2
     commits should equal (expected)
   }
+
+  it should "find four changes" in {
+    val first = add("src/A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("src/A.java", "public class A{\npublic void m(){\nint x=15;\n}\n}")
+    val third = add("src/A.java", "public class A{\npublic void m(){\nint x=22;\n}\n}")
+    val fourth = add("src/A.java", "public class A{\npublic void m(){\nint y=22;\n}\n}")
+    val expected = Seq(first getName, second getName, third getName, fourth getName)
+
+    val commits = new StatementChangeDetector(repo getAbsolutePath).findCommits("A.java", 3)
+    commits should have size 4
+    commits should equal (expected)
+  }
 }
