@@ -33,4 +33,9 @@ class JSONDecoderTest extends FlatSpec with Matchers {
     result(1).getLineNumber should equal (88)
   }
 
+  it should "decode this tricky line" in {
+    var resource = getClass.getResource("/trickyline.json")
+    var result = JSONDecoder.decode(new File(resource.getFile))
+    result should have size 1
+  }
 }
