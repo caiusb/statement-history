@@ -3,23 +3,20 @@ package edu.oregonstate.mutation.statementHistory
 import java.io.File
 
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.diff.DiffFormatter
-import org.eclipse.jgit.diff.RawTextComparator
-import org.eclipse.jgit.revwalk.RevCommit
-import org.eclipse.jgit.revwalk.RevSort
-import org.eclipse.jgit.revwalk.RevTree
-import org.eclipse.jgit.revwalk.RevWalk
-import org.eclipse.jgit.treewalk.filter.PathFilter
+import org.eclipse.jgit.diff.{DiffFormatter, RawTextComparator}
+import org.eclipse.jgit.revwalk.{RevCommit, RevSort, RevTree, RevWalk}
+import org.eclipse.jgit.treewalk.TreeWalk
+import org.eclipse.jgit.treewalk.filter.{PathSuffixFilter, PathFilter, TreeFilter}
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import org.gitective.core.CommitUtils
 
 class FileFinder(repo: String) {
-  
+
 	val git = Git.open(new File(repo))
 
   def createWalkWithFilter(path: String) = {
     val walk = new RevWalk(git.getRepository)
-    val treeFilter = PathFilter.create(path)
+    val treeFilter = PathSuffixFilter.create(path)
     walk.setTreeFilter(treeFilter)
     walk.sort(RevSort.NONE) //clear filters
     walk.sort(RevSort.COMMIT_TIME_DESC, true)
@@ -57,7 +54,7 @@ class FileFinder(repo: String) {
       if (commit.getParentCount != 0)
         secondTree = commit.getParent(0).getTree
       val diffs = diff.scan(secondTree, commit.getTree)
-      val result = diffs.filter { diff => diff.getNewPath.equals(path) || diff.getOldPath.equals(path) }
+      val result = diffs.filter { diff => diff.getNewPath.endsWith(path) || diff.getOldPath.endsWith(path) }
       result.size != 0
     }
     

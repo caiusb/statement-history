@@ -40,4 +40,11 @@ class FileFinderTest extends GitTest {
     all should have size 2
     all should equal (expectedList)
   }
+
+  it should "find file from incomplete path" in {
+    var first = add("src/bla/A.java", "public class A{}")
+    val all = fileFinder.findAll("A.java")
+    all should have size 1
+    all(0) should equal (first getName)
+  }
 }
