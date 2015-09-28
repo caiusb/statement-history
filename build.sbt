@@ -11,17 +11,23 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.4.3"
 )
 
-assemblyMergeStrategy in assembly := {
-  case "META-INF/MANIFEST.MF" => MergeStrategy.discard
-  case x => MergeStrategy.first
-}
-
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
-mainClass in Compile := Some("edu.oregonstate.mutation.statementHistory.Main")
+val mc = Some("edu.oregonstate.mutation.statementHistory.Main")
+
+mainClass in (Compile, run) := mc
+
+mainClass in assembly := mc
 
 lazy val root = (project in file(".")).
   settings(
     name := "statement-history",
     version := "0.1"
   )
+
+lazy val versionReport = TaskKey[String]("version-report")
+
+assemblyMergeStrategy in assembly := {
+  case PathList("META-INF", xs @ _*) => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
