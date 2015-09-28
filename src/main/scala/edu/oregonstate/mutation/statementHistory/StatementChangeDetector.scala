@@ -2,8 +2,9 @@ package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
 
-import fr.labri.gumtree.actions.model.{Move, Delete, Update}
+import fr.labri.gumtree.actions.model.{Action, Move, Delete, Update}
 import fr.labri.gumtree.gen.jdt.JdtTree
+import fr.labri.gumtree.matchers.MappingStore
 import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit, Statement}
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
@@ -13,18 +14,27 @@ class StatementChangeDetector(repo: String) {
 
   var git = Git.open(new File((repo)))
 
-  def findCommits(filePath: String, lineNo: Int): Seq[String] = {
+  def findCommits(filePath: String, lineNo: Int): Seq[CommitInfo] = {
     var line = lineNo
-    var validCommits = scala.collection.mutable.Seq[String]()
+    var validCommits = scala.collection.mutable.Seq[CommitInfo]()
     val commitsOfFile = new FileFinder(repo).findAll(filePath)
     val firstCommit = commitsOfFile(0)
     var fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, firstCommit), filePath)
     var statement = new StatementFinder(repo).findStatement(firstCommit, fullPath, line)
 
-    validCommits = validCommits :+ firstCommit
+    validCommits = validCommits :+ new CommitInfo(firstCommit, "ADD")
 
     val finder = new StatementFinder(repo)
 
+    def findNewLine(matchings: MappingStore, x: Action): Unit = {
+      val node = x.getNode.asInstanceOf[JdtTree]
+      val jdtNode = matchings.getDst(node).asInstanceOf[JdtTree].getContainedNode
+      val startPosition = jdtNode.getStartPosition
+      jdtNode.getRoot match {
+        case n: CompilationUnit => line = n.getLineNumber(startPosition)
+        case _ => line = -1
+      }
+    }
     commitsOfFile.reduce((left, right) => {
       if (line == -1)  //TODO: I do not like this hack. I need fo find a nicer way to solve this
         return validCommits
@@ -39,16 +49,13 @@ class StatementChangeDetector(repo: String) {
         isInStatement(leftStatement, node)
       })
       changedStatement match {
-        case Some(x) => validCommits = validCommits :+ right
+        case Some(x) => //validCommits = validCommits :+ right
           x match {
-            case x: Delete => line = -1 // Stop tracking
-            case _: Update | _: Move => val node = x.getNode.asInstanceOf[JdtTree]
-              val jdtNode = matchings.getDst(node).asInstanceOf[JdtTree].getContainedNode
-              val startPosition = jdtNode.getStartPosition
-              jdtNode.getRoot match {
-                case n: CompilationUnit => line = n.getLineNumber(startPosition)
-                case _ => line = -1
-              }
+            case x: Delete => validCommits = validCommits :+ new CommitInfo(right, "DELETE")
+              line = -1 // Stop tracking
+            case _: Update => validCommits = validCommits :+ new CommitInfo(right, "UPDATE")
+              findNewLine(matchings, x)
+            case _: Move => validCommits = validCommits :+ new CommitInfo(right, "MOVE")
           }
         case _ => ;
       }
