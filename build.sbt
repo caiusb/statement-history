@@ -11,6 +11,11 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.4.3"
 )
 
+assemblyMergeStrategy in assembly := {
+  case "META-INF/MANIFEST.MF" => MergeStrategy.discard
+  case x => MergeStrategy.first
+}
+
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
 
 mainClass in Compile := Some("edu.oregonstate.mutation.statementHistory.Main")
