@@ -1,70 +1,72 @@
 package edu.oregonstate.mutation.statementHistory
 
 class StatementChangeDetectorTest extends GitTest {
-  
+
+  private def ci(a: String, b:String): CommitInfo = new CommitInfo(a, b)
+
   it should "find a statement change in two consecutive commits" in {
     val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
     val second = add("A.java", "public class A{\npublic void m(){\nint x=2;\n}\n}")
-    val expected = Seq(first getName, second getName)
-    
+    val expected = Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"))
+
     val detector = new StatementChangeDetector(repo getAbsolutePath)
     val commits = detector.findCommits("A.java", 3)
     commits should have size 2
-    commits should equal (expected)
+    commits should equal(expected)
   }
 
   it should "find a statement in three consecutive commits" in {
     val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
     val second = add("A.java", "public class A{\npublic void m(){\nint x=2;\n}\n}")
     val third = add("A.java", "public class A{\npublic void m(){\nint x=10;\n}\n}")
-    val expected = Seq(first getName, second getName, third getName)
+    val expected = Seq(ci(first.getName, "ADD"), ci(second.getName,"UPDATE"), ci(third.getName,"UPDATE"))
     val detector = new StatementChangeDetector(repo getAbsolutePath)
     val commits = detector.findCommits("A.java", 3)
     commits should have size 3
-    commits should equal (expected)
+    commits should equal(expected)
   }
 
   it should "find a statement if the line number changes" in {
     val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
     val second = add("A.java", "public class A{\npublic void m(){\n//some comment\nint x=2;\n}\n}")
     val third = add("A.java", "public class A{\npublic void m(){\n//some comment\nint x=10;\n}\n}")
-    val expected = Seq(first getName, second getName, third getName)
+    val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"UPDATE"), ci(third.getName, "UPDATE"))
 
     val detector = new StatementChangeDetector(repo getAbsolutePath)
     val commits = detector.findCommits("A.java", 3)
     commits should have size 3
-    commits should equal (expected)
+    commits should equal(expected)
   }
 
   it should "find a statement if another one was added" in {
     val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
     val second = add("A.java", "public class A{\npublic void m(){\nint y=33;\nint x=2;\n}\n}")
-    val expected = Seq(first getName, second getName)
+    val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"UPDATE"))
 
     val commits = new StatementChangeDetector(repo getAbsolutePath).findCommits("A.java", 3)
     commits should have size 2
-    commits should equal (expected)
+    commits should equal(expected)
   }
 
   it should "know if something was deleted" in {
     val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
     val second = add("A.java", "public class A{\npublic void m(){}\n}")
     add("A.java", "public class A{\npublic void m(){}\npublic void n(){}}")
-    val expected = Seq(first getName, second getName)
+    val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"DELETE"))
 
     val commits = new StatementChangeDetector(repo getAbsolutePath).findCommits("A.java", 3)
     commits should have size 2
-    commits should equal (expected)
+    commits should equal(expected)
   }
 
   it should "find the commit with a partial path" in {
     val first = add("src/A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
     val second = add("src/A.java", "public class A{\npublic void m(){}\n}")
-    val expected = Seq(first getName, second getName)
+    val expected = Seq(ci(first.getName,"ADD"), ci(second.getName, "DELETE"))
 
     val commits = new StatementChangeDetector(repo getAbsolutePath).findCommits("A.java", 3)
     commits should have size 2
-    commits should equal (expected)
+    commits should equal(expected)
   }
 
   it should "find four changes" in {
@@ -72,10 +74,10 @@ class StatementChangeDetectorTest extends GitTest {
     val second = add("src/A.java", "public class A{\npublic void m(){\nint x=15;\n}\n}")
     val third = add("src/A.java", "public class A{\npublic void m(){\nint x=22;\n}\n}")
     val fourth = add("src/A.java", "public class A{\npublic void m(){\nint y=22;\n}\n}")
-    val expected = Seq(first getName, second getName, third getName, fourth getName)
+    val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"UPDATE"), ci(third.getName,"UPDATE"), ci(fourth.getName,"UPDATE"))
 
     val commits = new StatementChangeDetector(repo getAbsolutePath).findCommits("A.java", 3)
     commits should have size 4
-    commits should equal (expected)
+    commits should equal(expected)
   }
 }
