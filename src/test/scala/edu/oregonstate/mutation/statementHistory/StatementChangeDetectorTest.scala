@@ -114,4 +114,15 @@ class StatementChangeDetectorTest extends GitTest {
     commits should have size 2
     commits should equal(expected)
   }
+
+  it should "track a moved statement" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("A.java", "public class A{\npublic void m(){\nSystem.out.println(\"\");\nint x=3;\n}\n}")
+    val third = add("A.java", "public class A{\npublic void m(){\nSystem.out.println(\"\");\nint x=4;\n}\n}")
+    val expected = Seq(ci(first.getName, "ADD"), ci(third.getName, "UPDATE"))
+
+    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 4)
+    commits should have size 2
+    commits should equal (expected)
+  }
 }
