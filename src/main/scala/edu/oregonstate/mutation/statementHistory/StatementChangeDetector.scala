@@ -44,15 +44,13 @@ class StatementChangeDetector(repo: String, sha: String) {
         case Some(x) =>
           x match {
             case _: Delete => validCommits = validCommits :+ new CommitInfo(newer, "DELETE")
-              line = -1 // Stop tracking
             case _: Update => validCommits = validCommits :+ new CommitInfo(newer, "UPDATE")
-              line = findOldLine(statement, matchings)
             case _: Move => validCommits = validCommits :+ new CommitInfo(newer, "MOVE")
-              line = findOldLine(statement, matchings)
             case _ => ;
           }
         case _ => ;
       }
+      line = findOldLine(statement, matchings)
       older
     })
 
