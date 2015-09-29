@@ -26,7 +26,7 @@ class StatementChangeDetector(repo: String, sha: String) {
 
     val finder = new StatementFinder(repo)
 
-    val last = commitsOfFile.reverse.reduce((newer, older) => {
+    val last = commitsOfFile.reverse.reduceLeft((newer, older) => {
       if (line == -1)  //TODO: I do not like this hack. I need fo find a nicer way to solve this
         return validCommits
 
@@ -37,13 +37,18 @@ class StatementChangeDetector(repo: String, sha: String) {
       val olderTree = diff.getTree(finder.getFileContent(older, fullPath))
       val (actions, matchings) = diff.getActions(olderTree, newerTree)
       val changedStatement = actions.find(action => {
-        val node = matchings.getDst(action.getNode).asInstanceOf[JdtTree].getContainedNode
-        isInStatement(statement, node)
+        println(action)
+        action match {
+          case _: Insert => false
+          case _: Delete => false
+          case _ =>
+            val node = matchings.getDst(action.getNode).asInstanceOf[JdtTree].getContainedNode
+            isInStatement(statement, node)
+        }
       })
       changedStatement match {
         case Some(x) =>
           x match {
-            case _: Delete => validCommits = validCommits :+ new CommitInfo(newer, "DELETE")
             case _: Update => validCommits = validCommits :+ new CommitInfo(newer, "UPDATE")
             case _: Move => validCommits = validCommits :+ new CommitInfo(newer, "MOVE")
             case _ => ;
@@ -64,7 +69,8 @@ class StatementChangeDetector(repo: String, sha: String) {
       case Some(m) => val firstNode = m.getFirst.asInstanceOf[JdtTree].getContainedNode
         val start = firstNode.getStartPosition
         firstNode.getRoot.asInstanceOf[CompilationUnit].getLineNumber(start)
-      case _ => -1
+      case _ =>
+        -1
     }
   }
 
