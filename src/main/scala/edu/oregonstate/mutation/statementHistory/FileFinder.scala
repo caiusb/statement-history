@@ -5,7 +5,8 @@ import java.util
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
-import org.eclipse.jgit.revwalk.{RevCommit, RevSort, RevWalk}
+import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
+import org.eclipse.jgit.revwalk.RevSort._
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 import org.gitective.core.CommitUtils
 
@@ -13,34 +14,33 @@ class FileFinder(repo: String) {
 
 	val git = Git.open(new File(repo))
 
-  def createWalkWithFilter(path: String) = {
+  def createWalkWithFilter(path: String, sha: String) = {
     val walk = new RevWalk(git.getRepository)
     val treeFilter = PathSuffixFilter.create(path)
     walk.setTreeFilter(treeFilter)
-    walk.sort(RevSort.NONE) //clear filters
-    walk.sort(RevSort.COMMIT_TIME_DESC, true)
-    walk.sort(RevSort.REVERSE, true)
-    walk.markStart(CommitUtils.getCommit(git.getRepository, "HEAD"))
+    walk.sort(NONE) //clear filters
+    walk.sort(COMMIT_TIME_DESC, true)
+    walk.markStart(CommitUtils.getCommit(git.getRepository, sha))
     walk
   }
 
-	def findFirst(path: String): RevCommit = {
-			val walk = createWalkWithFilter(path)
+	def findFirst(path: String, sha: String): RevCommit = {
+			val walk = createWalkWithFilter(path, sha)
 			val nextCommit = walk.next
 			walk.close
 			nextCommit
 	}
 
-  def findAll(path: String): Seq[String] = {
+  def findAll(path: String, sha: String): Seq[String] = {
     import GitUtil._
     import scala.collection.JavaConversions._
 
-    val first = findFirst(path)
+    val first = findFirst(path, sha)
     val walk = new RevWalk(git.getRepository)
-    walk.sort(RevSort.NONE)
-    walk.sort(RevSort.COMMIT_TIME_DESC, true)
-    walk.sort(RevSort.REVERSE, true)
-    walk.markStart(CommitUtils.getCommit(git.getRepository, "HEAD"))
+    walk.sort(NONE)
+    walk.sort(COMMIT_TIME_DESC, true)
+    walk.sort(REVERSE, true)
+    walk.markStart(CommitUtils.getCommit(git.getRepository, sha))
     walk.markUninteresting(first)
     
     val iterator = asScalaIterator(walk.iterator)
@@ -51,9 +51,7 @@ class FileFinder(repo: String) {
       result.size != 0
     }
     
-    val shas = iterator.filter(ifCommitChangesFile).map { commit => commit.getName }
-    
-    return shas.toSeq
+    iterator.filter(ifCommitChangesFile).map { commit => commit.getName }.toSeq
 	}
 
 

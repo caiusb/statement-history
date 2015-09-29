@@ -9,10 +9,11 @@ object Main {
   def main(args: Array[String]) = {
     val repo = args(0)
     var jsonFile = args(1)
+    var commitSha = args(2)
 
     disableLoggers()
 
-    val detector = new StatementChangeDetector(repo)
+    val detector = new StatementChangeDetector(repo, commitSha)
     val mutants = JSONDecoder.decode(new File(jsonFile))
 
     val result = mutants.toParArray.map(mutant => {

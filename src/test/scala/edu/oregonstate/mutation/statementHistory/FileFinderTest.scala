@@ -11,14 +11,14 @@ class FileFinderTest extends GitTest {
   
   it should "find the file" in {
     val commit = add("A.java", "public class A{}")
-    val sha = fileFinder.findFirst("A.java").getName
+    val sha = fileFinder.findFirst("A.java", "HEAD").getName
     commit.getName should equal (sha)
   }
   
   it should "find the file in more than one commit" in {
      add("B.java", "public class B{]")
      val commit = add("A.java", "public class A{}")
-     val sha = fileFinder.findFirst("A.java").getName
+     val sha = fileFinder.findFirst("A.java", "HEAD").getName
      commit.getName should equal (sha)
   }
 
@@ -26,7 +26,7 @@ class FileFinderTest extends GitTest {
     val first = add("A.java", "public class A{}")
     val second = add("A.java", "public class A{public void m(){}}")
     val expectedList = Seq(first getName, second getName)
-    val all = fileFinder.findAll("A.java")
+    val all = fileFinder.findAll("A.java", "HEAD")
     all should have size 2
     all should equal (expectedList)
   }
@@ -36,14 +36,14 @@ class FileFinderTest extends GitTest {
  		add("B.java", "public class B{}")
     val second = add("A.java", "public class B{}")
     val expectedList = Seq(first getName, second getName)
-    val all = fileFinder.findAll("A.java")
+    val all = fileFinder.findAll("A.java", "HEAD")
     all should have size 2
     all should equal (expectedList)
   }
 
   it should "find file from incomplete path" in {
     var first = add("src/bla/A.java", "public class A{}")
-    val all = fileFinder.findAll("A.java")
+    val all = fileFinder.findAll("A.java", "HEAD")
     all should have size 1
     all(0) should equal (first getName)
   }
