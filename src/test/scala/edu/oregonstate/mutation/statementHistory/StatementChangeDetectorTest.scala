@@ -50,14 +50,13 @@ class StatementChangeDetectorTest extends GitTest {
     commits should equal(expected)
   }
 
-  ignore should "know if something was deleted" in {
-    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
-    val second = add("A.java", "public class A{\npublic void m(){}\n}")
-    add("A.java", "public class A{\npublic void m(){}\npublic void n(){}}")
-    val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"DELETE"))
+  it should "stop when a statement was added" in {
+    val first = add("A.java", "public class A{\npublic void m(){}\n}")
+    val second = add("A.java", "public class A{\npublic void m(){int x=3;}\n}")
+    val expected = Seq(ci(second.getName,"ADD"))
 
     val commits = nd(repo getAbsolutePath).findCommits("A.java", 3)
-    commits should have size 2
+    commits should have size 1
     commits should equal(expected)
   }
 
