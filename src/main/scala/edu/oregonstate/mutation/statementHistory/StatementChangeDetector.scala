@@ -26,7 +26,7 @@ class StatementChangeDetector(repo: String, sha: String) {
 
     val finder = new StatementFinder(repo)
 
-    val last = commitsOfFile.reduceRight((older, newer) => {
+    val first = commitsOfFile.reduceRight((older, newer) => {
       if (line == -1)  //TODO: I do not like this hack. I need fo find a nicer way to solve this
         return validCommits
 
@@ -53,11 +53,11 @@ class StatementChangeDetector(repo: String, sha: String) {
         relevantActions = relevantActions.filter(action => {
           action.getNode.asInstanceOf[JdtTree].getContainedNode == statement})
 
-      relevantActions.foreach(changedStatement =>
+      val first = relevantActions.foreach(changedStatement =>
         changedStatement match {
-          case _: Insert => validCommits = validCommits :+ new CommitInfo(newer, "ADD")
-          case _: Update => validCommits = validCommits :+ new CommitInfo(newer, "UPDATE")
-          case _: Move => validCommits = validCommits :+ new CommitInfo(newer, "MOVE")
+          case _: Insert => validCommits = validCommits.+:(new CommitInfo(newer, "ADD"))
+          case _: Update => validCommits = validCommits.+:(new CommitInfo(newer, "UPDATE"))
+          case _: Move => validCommits = validCommits.+:(new CommitInfo(newer, "MOVE"))
           case _ => ;
       })
       line = oldLine
@@ -65,9 +65,9 @@ class StatementChangeDetector(repo: String, sha: String) {
     })
 
     if (line != -1)
-      validCommits.reverse.+:(new CommitInfo(last, "ADD"))
+      validCommits.+:(new CommitInfo(first, "ADD"))
     else
-      validCommits.reverse
+      validCommits
   }
 
   def isUpdate: (Action) => Boolean = {
