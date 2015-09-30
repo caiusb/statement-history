@@ -52,7 +52,7 @@ class StatementChangeDetectorTest extends GitTest {
 
   it should "stop when a statement was added" in {
     val first = add("A.java", "public class A{\npublic void m(){}\n}")
-    val second = add("A.java", "public class A{\npublic void m(){int x=3;}\n}")
+    val second = add("A.java", "public class A{\npublic void m(){\nint x=3;}}")
     val expected = Seq(ci(second.getName,"ADD"))
 
     val commits = nd(repo getAbsolutePath).findCommits("A.java", 3)
