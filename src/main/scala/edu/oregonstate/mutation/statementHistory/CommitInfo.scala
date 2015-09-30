@@ -3,7 +3,7 @@ package edu.oregonstate.mutation.statementHistory
 /**
  * Created by caius on 9/28/15.
  */
-class CommitInfo(private val sha: String, private val action: String) {
+class CommitInfo(val sha: String, val action: String) {
 
   override def toString: String = {
     return sha + "," + action
