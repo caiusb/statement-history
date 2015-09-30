@@ -47,12 +47,10 @@ class StatementChangeDetector(repo: String, sha: String) {
         }
       })
 
-      println("Looking for: " + statement + " at " + line)
       if (relevantActions.exists(isUpdate))
         relevantActions = relevantActions.filter(isUpdate)
       else
         relevantActions = relevantActions.filter(action => {
-          println(action.getNode.asInstanceOf[JdtTree].getContainedNode.getClass)
           action.getNode.asInstanceOf[JdtTree].getContainedNode == statement})
 
       relevantActions.foreach(changedStatement =>
