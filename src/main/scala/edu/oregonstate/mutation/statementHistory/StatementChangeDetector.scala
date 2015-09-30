@@ -26,7 +26,7 @@ class StatementChangeDetector(repo: String, sha: String) {
 
     val finder = new StatementFinder(repo)
 
-    val last = commitsOfFile.reverse.reduceLeft((newer, older) => {
+    val last = commitsOfFile.reduceRight((older, newer) => {
       if (line == -1)  //TODO: I do not like this hack. I need fo find a nicer way to solve this
         return validCommits
 
@@ -36,30 +36,47 @@ class StatementChangeDetector(repo: String, sha: String) {
       val statement = finder.findStatement(line, newerContent, newerTree.asInstanceOf[JdtTree].getContainedNode)
       val olderTree = diff.getTree(finder.getFileContent(older, fullPath))
       val (actions, matchings) = diff.getActions(olderTree, newerTree)
-      val changedStatement = actions.find(action => {
-        println(action)
+      val oldLine = findOldLine(statement, matchings)
+      var relevantActions = actions.filter(action => {
         action match {
-          case _: Insert => false
+          case _: Insert => oldLine == -1
           case _: Delete => false
           case _ =>
             val node = matchings.getDst(action.getNode).asInstanceOf[JdtTree].getContainedNode
             isInStatement(statement, node)
         }
       })
-      changedStatement match {
-        case Some(x) =>
-          x match {
-            case _: Update => validCommits = validCommits :+ new CommitInfo(newer, "UPDATE")
-            case _: Move => validCommits = validCommits :+ new CommitInfo(newer, "MOVE")
-            case _ => ;
-          }
-        case _ => ;
-      }
-      line = findOldLine(statement, matchings)
+
+      println("Looking for: " + statement + " at " + line)
+      if (relevantActions.exists(isUpdate))
+        relevantActions = relevantActions.filter(isUpdate)
+      else
+        relevantActions = relevantActions.filter(action => {
+          println(action.getNode.asInstanceOf[JdtTree].getContainedNode.getClass)
+          action.getNode.asInstanceOf[JdtTree].getContainedNode == statement})
+
+      relevantActions.foreach(changedStatement =>
+        changedStatement match {
+          case _: Insert => validCommits = validCommits :+ new CommitInfo(newer, "ADD")
+          case _: Update => validCommits = validCommits :+ new CommitInfo(newer, "UPDATE")
+          case _: Move => validCommits = validCommits :+ new CommitInfo(newer, "MOVE")
+          case _ => ;
+      })
+      line = oldLine
       older
     })
 
-    validCommits.reverse.+:(new CommitInfo(last, "ADD"))
+    if (line != -1)
+      validCommits.reverse.+:(new CommitInfo(last, "ADD"))
+    else
+      validCommits.reverse
+  }
+
+  def isUpdate: (Action) => Boolean = {
+    action => action match {
+      case _: Update => true
+      case _ => false
+    }
   }
 
   def findOldLine(statement: Statement, matchings: MappingStore): Int = {
@@ -69,8 +86,7 @@ class StatementChangeDetector(repo: String, sha: String) {
       case Some(m) => val firstNode = m.getFirst.asInstanceOf[JdtTree].getContainedNode
         val start = firstNode.getStartPosition
         firstNode.getRoot.asInstanceOf[CompilationUnit].getLineNumber(start)
-      case _ =>
-        -1
+      case _ => -1
     }
   }
 
