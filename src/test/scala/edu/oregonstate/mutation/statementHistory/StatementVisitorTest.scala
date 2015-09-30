@@ -6,7 +6,7 @@ import AST._
 
 class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
 
-  private var visitor:StatementVisitor = _
+  private var visitor: StatementVisitor = _
 
   before {
     visitor = new StatementVisitor
@@ -24,17 +24,26 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
     stmtMap
   }
 
-  private def checkCU(stmt: String): Unit = {
+  private def checkCU(stmt: String, expected: Int): Unit = {
     val visitor = new StatementVisitor
     getAST(stmt).accept(visitor)
-    assertStatement(visitor.getStatementMap)
+    assertStatement(visitor.getStatementMap, expected)
   }
 
-  def checkStatement(stmt: String): Unit =
-    assertStatement(getStatementMap(stmt))
+  private def checkCU(stmt: String): Unit =
+    checkCU(stmt, 1)
 
-  def assertStatement(stmtMap: Map[Int, Statement]): Unit = {
-    stmtMap should have size 1
+  def checkStatement(stmt: String): Unit =
+    checkStatement(stmt, 1)
+
+  def checkStatement(stmt: String, expected: Int): Unit =
+    assertStatement(getStatementMap(stmt), expected)
+
+  def assertStatement(stmtMap: Map[Int, Statement]): Unit =
+    assertStatement(stmtMap, 1)
+
+  def assertStatement(stmtMap: Map[Int, Statement], expected: Int): Unit = {
+    stmtMap should have size expected
     stmtMap(2) should not be null
   }
 
@@ -54,10 +63,12 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
     checkStatement("break;")
 
   it should "find a do statement" in
-    checkStatement("do {\nint x=3;}\nwhile(true);")
+    checkStatement("do {\nint x=3;}\nwhile(true);", 2)
 
-  it should "find a empty statement" in
-    checkStatement(";")
+  it should "not find a empty statement" in {
+    val map = getStatementMap(";")
+    map should have size 0
+  }
 
   it should "find an enhanced for statement" in
     checkStatement("for(Object x : new Array[2]){}")
@@ -66,7 +77,7 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
     checkStatement("for(int i=0; i<10; i++){}")
 
   it should "find an if statement" in
-    checkStatement("if(true}{;}")
+    checkStatement("if(1 != 2){}")
 
   it should "find a labeled statement" in
     checkStatement("label: ;")
@@ -78,10 +89,10 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
     checkCU("public class A {\npublic A(){\nsuper();}}")
 
   it should "find a switch statement" in
-    checkStatement("switch(3){\ncase 3: ;}")
+    checkStatement("switch(3){\ncase 3: ;}", 2)
 
-  ignore should "find a switch case statement" in
-    checkCU("public class A {\npublic void m() { switch(3){\ncase 3: ;}}}")
+  it should "find a switch case statement" in
+    checkCU("public class A {\npublic void m() { switch(3){\ncase 3: ;}}}", 2)
 
   it should "find a while statement" in
     checkStatement("while(true){;}")

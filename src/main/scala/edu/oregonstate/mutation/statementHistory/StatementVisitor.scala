@@ -33,22 +33,22 @@ class StatementVisitor() extends ASTVisitor {
     visitStatement(node)
 
   override def visit(node: DoStatement): Boolean =
-    visitStatement(node)
+    !visitStatement(node)
 
   override def visit(node: EmptyStatement): Boolean =
-    visitStatement(node)
+    false
 
   override def visit(node: EnhancedForStatement): Boolean =
-    visitStatement(node)
+    !visitStatement(node)
 
   override def visit(node: ExpressionStatement): Boolean =
     visitStatement(node)
 
   override def visit(node: ForStatement): Boolean =
-    visitStatement(node)
+    !visitStatement(node)
 
   override def visit(node: IfStatement): Boolean =
-    visitStatement(node)
+    !visitStatement(node)
 
   override def visit(node: LabeledStatement): Boolean =
     visitStatement(node)
@@ -60,10 +60,10 @@ class StatementVisitor() extends ASTVisitor {
     visitStatement(node)
 
   override def visit(node: SwitchStatement): Boolean =
-    visitStatement(node)
+    !visitStatement(node)
 
   override def visit(node: WhileStatement): Boolean =
-  visitStatement(node)
+    !visitStatement(node)
 
   //not tested
   override def visit(node: SwitchCase): Boolean =
@@ -76,7 +76,7 @@ class StatementVisitor() extends ASTVisitor {
     visitStatement(node)
 
   override def visit(node: SynchronizedStatement): Boolean =
-    visitStatement(node)
+    !visitStatement(node)
 
   override def visit(node: TypeDeclarationStatement): Boolean =
     visitStatement(node)
