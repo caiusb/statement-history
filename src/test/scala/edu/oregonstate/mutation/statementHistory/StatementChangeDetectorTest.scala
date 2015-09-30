@@ -124,4 +124,14 @@ class StatementChangeDetectorTest extends GitTest {
     commits should have size 2
     commits should equal (expected)
   }
+
+  it should "track a statement inside a block" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nif(true){int x=3;}\n}\n}")
+    val second = add("A.java", "public class A{\npublic void m(){\nif(true){\nint x=343;}\n}\n}")
+    val expected = Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"))
+
+    val commits = nd(repo.getAbsolutePath).findCommits("A.java",4)
+    commits should have size commits.size
+    commits should equal (expected)
+  }
 }
