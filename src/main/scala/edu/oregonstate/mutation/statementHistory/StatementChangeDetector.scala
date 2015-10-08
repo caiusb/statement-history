@@ -12,19 +12,22 @@ import org.gitective.core.CommitUtils
 
 import scala.collection.JavaConversions
 
-class StatementChangeDetector(repo: String, sha: String) {
+class StatementChangeDetector(repo: File, sha: String) {
 
-  var git = Git.open(new File((repo)))
+  var git = Git.open(repo)
+
+  def this(repo: String, sha: String) = this(new File(repo), sha)
+
 
   def findCommits(filePath: String, lineNo: Int): Seq[CommitInfo] = {
     var line = lineNo
     var validCommits = scala.collection.mutable.Seq[CommitInfo]()
-    val commitsOfFile = new FileFinder(repo).findAll(filePath, sha)
+    val commitsOfFile = new FileFinder(repo.getAbsolutePath).findAll(filePath, sha)
     val firstCommit = commitsOfFile.last
     var fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, firstCommit), filePath)
-    var statement = new StatementFinder(repo).findStatement(firstCommit, fullPath, line)
+    var statement = new StatementFinder(repo.getAbsolutePath).findStatement(firstCommit, fullPath, line)
 
-    val finder = new StatementFinder(repo)
+    val finder = new StatementFinder(repo.getAbsolutePath)
 
     val first = commitsOfFile.reduceRight((older, newer) => {
       if (line == -1)  //TODO: I do not like this hack. I need fo find a nicer way to solve this
