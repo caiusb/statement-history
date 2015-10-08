@@ -30,7 +30,7 @@ class StatementChangeDetector(repo: File, sha: String) {
     val finder = new StatementFinder(repo.getAbsolutePath)
 
     val first = commitsOfFile.reduceRight((older, newer) => {
-      if (line == -1)  //TODO: I do not like this hack. I need fo find a nicer way to solve this
+      if (line == -1)
         return validCommits
 
       val diff = new ASTDiff
@@ -80,16 +80,33 @@ class StatementChangeDetector(repo: File, sha: String) {
     }
   }
 
-  def findOldLine(statement: Statement, matchings: MappingStore): Int = {
-    JavaConversions.asScalaIterator(matchings.iterator()).find(m => {
-      m.getSecond.asInstanceOf[JdtTree].getContainedNode == statement
-    }) match {
-      case Some(m) => val firstNode = m.getFirst.asInstanceOf[JdtTree].getContainedNode
-        val start = firstNode.getStartPosition
-        firstNode.getRoot.asInstanceOf[CompilationUnit].getLineNumber(start)
-      case _ => -1
-    }
+  def convertMatching(matchings: MappingStore): List[(ASTNode, ASTNode)] = {
+    var list = List[(ASTNode, ASTNode)]()
+    JavaConversions.asScalaIterator(matchings.iterator()).foreach(m => {
+      val first = m.getFirst.asInstanceOf[JdtTree].getContainedNode
+      val second = m.getSecond.asInstanceOf[JdtTree].getContainedNode
+      list = list.+:(first,second)
+    })
+    list
   }
+
+  def findOldLine(statement: Statement, matchings: MappingStore): Int = {
+    val m = convertMatching(matchings)
+    findOldLine(statement, m)
+  }
+
+  def findOldLine(statement: Statement, m: List[(ASTNode, ASTNode)]): Int = {
+    m match {
+      case first :: rest =>
+        first match {
+          case (x, s) if (s == statement) =>
+            val start = x.getStartPosition
+            x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(start)
+          case _ => findOldLine(statement, rest)
+        }
+      case Nil => -1
+    }
+   }
 
   private def isInStatement(stmt: Statement, node: ASTNode): Boolean = {
     if (node == null)
