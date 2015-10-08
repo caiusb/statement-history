@@ -24,8 +24,8 @@ class StatementChangeDetector(repo: File, sha: String) {
     var validCommits = scala.collection.mutable.Seq[CommitInfo]()
     val commitsOfFile = new FileFinder(repo.getAbsolutePath).findAll(filePath, sha)
     val firstCommit = commitsOfFile.last
-    var fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, firstCommit), filePath)
-    var statement = new StatementFinder(repo.getAbsolutePath).findStatement(firstCommit, fullPath, line)
+    val fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, firstCommit), filePath)
+    val statement = new StatementFinder(repo.getAbsolutePath).findStatement(firstCommit, fullPath, line)
 
     val finder = new StatementFinder(repo.getAbsolutePath)
 
@@ -73,12 +73,11 @@ class StatementChangeDetector(repo: File, sha: String) {
       validCommits
   }
 
-  def isUpdate: (Action) => Boolean = {
+  def isUpdate: (Action) => Boolean =
     action => action match {
       case _: Update => true
       case _ => false
     }
-  }
 
   def convertMatching(matchings: MappingStore): List[(ASTNode, ASTNode)] = {
     var list = List[(ASTNode, ASTNode)]()
@@ -90,23 +89,22 @@ class StatementChangeDetector(repo: File, sha: String) {
     list
   }
 
-  def findOldLine(statement: Statement, matchings: MappingStore): Int = {
-    val m = convertMatching(matchings)
-    findOldLine(statement, m)
-  }
+  def findOldLine(statement: Statement, matchings: MappingStore): Int =
+    findOldLine(statement, convertMatching(matchings))
 
-  def findOldLine(statement: Statement, m: List[(ASTNode, ASTNode)]): Int = {
+  def findOldLine(statement: Statement, m: List[(ASTNode, ASTNode)]): Int =
     m match {
       case first :: rest =>
         first match {
           case (x, s) if (s == statement) =>
-            val start = x.getStartPosition
-            x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(start)
+            getLineNumber(x)
           case _ => findOldLine(statement, rest)
         }
       case Nil => -1
     }
-   }
+
+  private def getLineNumber(x: ASTNode): Int =
+    x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
 
   private def isInStatement(stmt: Statement, node: ASTNode): Boolean = {
     if (node == null)
