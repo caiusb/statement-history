@@ -131,7 +131,7 @@ class StatementChangeDetectorTest extends GitTest {
     val expected = Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"))
 
     val commits = nd(repo.getAbsolutePath).findCommits("A.java",4)
-    commits should have size commits.size
+    commits should have size expected.size
     commits should equal (expected)
   }
 }
