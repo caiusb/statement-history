@@ -26,7 +26,7 @@ object Main {
       } text("The json file with the mutants")
       opt[String]('c', "commit") action{ (x,c) =>
         c.copy(commit = x)
-      }
+      } text("The commit to reference the line number to; default is HEAD")
     }
 
     parser.parse(args, Config())
