@@ -20,6 +20,7 @@ class FileFinder(repo: String) {
     walk.setTreeFilter(treeFilter)
     walk.sort(NONE) //clear filters
     walk.sort(COMMIT_TIME_DESC, true)
+    walk.sort(REVERSE, true)
     walk.markStart(CommitUtils.getCommit(git.getRepository, sha))
     walk
   }

@@ -18,18 +18,22 @@ class StatementChangeDetector(repo: File, sha: String) {
 
   def this(repo: String, sha: String) = this(new File(repo), sha)
 
+  def findCommits(filePath: String, lineNo: Int): Seq[CommitInfo] =
+    findCommits(filePath, lineNo, "HEAD")
 
-  def findCommits(filePath: String, lineNo: Int): Seq[CommitInfo] = {
+  def findCommits(filePath: String, lineNo: Int, commit: String): Seq[CommitInfo] = {
     var line = lineNo
     var validCommits = scala.collection.mutable.Seq[CommitInfo]()
     val commitsOfFile = new FileFinder(repo.getAbsolutePath).findAll(filePath, sha)
-    val firstCommit = commitsOfFile.last
-    val fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, firstCommit), filePath)
-    val statement = new StatementFinder(repo.getAbsolutePath).findStatement(firstCommit, fullPath, line)
+    val fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, commit), filePath)
+    val statement = new StatementFinder(repo.getAbsolutePath).findStatement(commit, fullPath, line)
 
     val finder = new StatementFinder(repo.getAbsolutePath)
 
-    val first = commitsOfFile.reduceRight((older, newer) => {
+    commitsOfFile.reverse.sliding(2).foreach(l => {
+      val newer = l(0)
+      val older = l(1)
+
       if (line == -1)
         return validCommits
 
@@ -62,15 +66,18 @@ class StatementChangeDetector(repo: File, sha: String) {
           case _: Update => validCommits = validCommits.+:(new CommitInfo(newer, "UPDATE"))
           case _: Move => validCommits = validCommits.+:(new CommitInfo(newer, "MOVE"))
           case _ => ;
-      })
+        })
       line = oldLine
-      older
     })
 
-    if (line != -1)
-      validCommits.+:(new CommitInfo(first, "ADD"))
+   if (line != -1)
+      validCommits.+:(new CommitInfo(commitsOfFile(0), "ADD"))
     else
       validCommits
+  }
+
+  private def trackStatement(older: String, newer: String): String = {
+    return ""
   }
 
   def isUpdate: (Action) => Boolean =
@@ -103,8 +110,8 @@ class StatementChangeDetector(repo: File, sha: String) {
       case Nil => -1
     }
 
-  private def getLineNumber(x: ASTNode): Int =
-    x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
+  private def getLineNumber(node: ASTNode): Int =
+    node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(node.getStartPosition)
 
   private def isInStatement(stmt: Statement, node: ASTNode): Boolean = {
     if (node == null)
