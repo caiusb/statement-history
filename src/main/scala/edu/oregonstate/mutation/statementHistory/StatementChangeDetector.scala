@@ -29,7 +29,8 @@ class StatementChangeDetector(repo: File, sha: String) {
 
     val fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, commit), filePath)
 
-    val beforeResults = before.reverse.sliding(2).foldLeft(new ChangeInfo(lineNo, Seq())){(c, l) => processPair(c, l, fullPath, findOldLine)}
+    val beforeResults = before.reverse.sliding(2)
+      .foldLeft(new ChangeInfo(lineNo, Seq())){(c, l) => processPair(c, l, fullPath, findOldLine)}
 
     if (beforeResults.getLine != -1)
       beforeResults.copy(-1, new CommitInfo(before(0), "ADD")).getChangedCommits.reverse
