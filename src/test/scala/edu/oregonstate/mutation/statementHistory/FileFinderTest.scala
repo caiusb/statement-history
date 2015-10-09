@@ -47,4 +47,14 @@ class FileFinderTest extends GitTest {
     all should have size 1
     all(0) should equal (first getName)
   }
+
+  it should "find the file three times" in {
+    var first = add("A.java", "public class A{}");
+    val second = add("A.java", "public class A2{}");
+    var third = add("A.java", "public class A3{}");
+    val expected = Seq(first.getName, second.getName, third.getName)
+    val all = fileFinder.findAll("A.java", "HEAD")
+    all should have size expected.size
+    all should equal (expected)
+  }
 }
