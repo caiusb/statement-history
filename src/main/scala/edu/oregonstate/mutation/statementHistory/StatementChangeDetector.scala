@@ -14,66 +14,71 @@ import scala.collection.JavaConversions
 
 class StatementChangeDetector(repo: File, sha: String) {
 
-  var git = Git.open(repo)
+  private var git = Git.open(repo)
+  private val finder = new StatementFinder(repo.getAbsolutePath)
 
   def this(repo: String, sha: String) = this(new File(repo), sha)
 
   def findCommits(filePath: String, lineNo: Int): Seq[CommitInfo] =
     findCommits(filePath, lineNo, "HEAD")
-
   def findCommits(filePath: String, lineNo: Int, commit: String): Seq[CommitInfo] = {
-    var line = lineNo
-    var validCommits = scala.collection.mutable.Seq[CommitInfo]()
-    val commitsOfFile = new FileFinder(repo.getAbsolutePath).findAll(filePath, sha)
-    val fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, commit), filePath)
-    val statement = new StatementFinder(repo.getAbsolutePath).findStatement(commit, fullPath, line)
-
-    val finder = new StatementFinder(repo.getAbsolutePath)
-
-    commitsOfFile.reverse.sliding(2).foreach(l => {
-      val newer = l(0)
-      val older = l(1)
-
-      if (line == -1)
-        return validCommits
-
-      val diff = new ASTDiff
-      val newerContent = finder.getFileContent(newer, fullPath)
-      val newerTree = diff.getTree(newerContent)
-      val statement = finder.findStatement(line, newerContent, newerTree.asInstanceOf[JdtTree].getContainedNode)
-      val olderTree = diff.getTree(finder.getFileContent(older, fullPath))
-      val (actions, matchings) = diff.getActions(olderTree, newerTree)
-      val oldLine = findOldLine(statement, matchings)
-      var relevantActions = actions.filter(action => {
-        action match {
-          case _: Insert => oldLine == -1
-          case _: Delete => false
-          case _ =>
-            val node = matchings.getDst(action.getNode).asInstanceOf[JdtTree].getContainedNode
-            isInStatement(statement, node)
-        }
-      })
-
-      if (relevantActions.exists(isUpdate))
-        relevantActions = relevantActions.filter(isUpdate)
-      else
-        relevantActions = relevantActions.filter(action => {
-          action.getNode.asInstanceOf[JdtTree].getContainedNode == statement})
-
-      val first = relevantActions.foreach(changedStatement =>
-        changedStatement match {
-          case _: Insert => validCommits = validCommits.+:(new CommitInfo(newer, "ADD"))
-          case _: Update => validCommits = validCommits.+:(new CommitInfo(newer, "UPDATE"))
-          case _: Move => validCommits = validCommits.+:(new CommitInfo(newer, "MOVE"))
-          case _ => ;
-        })
-      line = oldLine
+    val before = new FileFinder(repo.getAbsolutePath).findAll(filePath, sha)
+    val after = new FileFinder(repo.getAbsolutePath).findAll(filePath, "HEAD").filter(commit => {
+      !before.contains(commit)
     })
 
-   if (line != -1)
-      validCommits.+:(new CommitInfo(commitsOfFile(0), "ADD"))
+    val fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, commit), filePath)
+
+    val beforeResults = before.reverse.sliding(2).foldLeft(new ChangeInfo(lineNo, Seq())){(c, l) => processPair(c, l, fullPath, findOldLine)}
+
+    if (beforeResults.getLine != -1)
+      beforeResults.copy(-1, new CommitInfo(before(0), "ADD")).getChangedCommits.reverse
     else
-      validCommits
+      beforeResults.getChangedCommits.reverse
+  }
+
+
+  private def processPair(c: ChangeInfo,
+                          l: Seq[String],
+                          fullPath: String,
+                          getNextLine:(Statement, MappingStore) => Int): ChangeInfo = {
+    val newer = l(0)
+    val older = l(1)
+
+    if (c.getLine == -1)
+      return c
+
+    val diff = new ASTDiff
+    val newerContent = finder.getFileContent(newer, fullPath)
+    val newerTree = diff.getTree(newerContent)
+    val statement = finder.findStatement(c.getLine, newerContent, newerTree.asInstanceOf[JdtTree].getContainedNode)
+    val olderTree = diff.getTree(finder.getFileContent(older, fullPath))
+    val (actions, matchings) = diff.getActions(olderTree, newerTree)
+    val nextLine = getNextLine(statement, matchings)
+    val relevantActions = actions.filter(action => {
+      action match {
+        case _: Insert => nextLine == -1
+        case _: Delete => false
+        case _ =>
+          val node = matchings.getDst(action.getNode).asInstanceOf[JdtTree].getContainedNode
+          isInStatement(statement, node)
+      }
+    })
+
+    if(!relevantActions.contains(isUpdate))
+      relevantActions.withFilter(action => {
+        action.getNode.asInstanceOf[JdtTree].getContainedNode == statement
+      })
+    else
+      relevantActions.withFilter(isUpdate)
+
+    relevantActions.foldLeft(c)((c, changedStatement) =>
+      changedStatement match {
+        case _: Insert => c.copy(nextLine, new CommitInfo(newer, "ADD"))
+        case _: Update => c.copy(nextLine, new CommitInfo(newer, "UPDATE"))
+        case _: Move => c.copy(nextLine, new CommitInfo(newer, "MOVE"))
+        case _ => c.copy(nextLine);
+      })
   }
 
   private def trackStatement(older: String, newer: String): String = {
@@ -110,6 +115,21 @@ class StatementChangeDetector(repo: File, sha: String) {
       case Nil => -1
     }
 
+
+  def findNewLine(statement: Statement, matchings: MappingStore): Int =
+    findNewLine(statement, convertMatching(matchings))
+
+  def findNewLine(statement: Statement, m: List[(ASTNode, ASTNode)]): Int =
+    m match {
+      case first :: rest =>
+        first match {
+          case (s, x) if (s == statement) =>
+            getLineNumber(x)
+          case _ => findNewLine(statement, rest)
+        }
+      case Nil => -1
+    }
+
   private def getLineNumber(node: ASTNode): Int =
     node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(node.getStartPosition)
 
@@ -128,5 +148,4 @@ class StatementChangeDetector(repo: File, sha: String) {
       diff.getNewPath.endsWith(path)
     })(0).getNewPath
   }
-
 }
