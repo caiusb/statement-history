@@ -4,6 +4,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.{RawTextComparator, DiffFormatter, DiffEntry}
 import org.eclipse.jgit.revwalk.{RevTree, RevCommit}
 import org.eclipse.jgit.util.io.DisabledOutputStream
+import org.gitective.core.BlobUtils
 
 import scala.collection.JavaConversions
 
@@ -24,4 +25,10 @@ object GitUtil {
     JavaConversions.asScalaBuffer(diffs)
   }
 
+  def getFileContent(git: Git, commitSHA: String, file: String): String = {
+    BlobUtils.getContent(git.getRepository, commitSHA, file) match {
+      case x: Any => x
+      case null => ""
+    }
+  }
 }

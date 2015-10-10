@@ -11,16 +11,9 @@ class StatementFinder(repo: String) {
   val git = Git.open(new File(repo))
 
   def findStatement(commitSHA: String, file: String, lineNumber: Int): Statement = {
-    val content: String = getFileContent(commitSHA, file)
+    val content: String = GitUtil.getFileContent(git, commitSHA, file)
     val ast: ASTNode = AST.getAST(content)
     findStatement(lineNumber, content, ast)
-  }
-
-  def getFileContent(commitSHA: String, file: String): String = {
-    BlobUtils.getContent(git.getRepository, commitSHA, file) match {
-      case x: Any => x
-      case null => ""
-    }
   }
 
   def findStatement(lineNumber: Int, content: String, ast: ASTNode): Statement = {
