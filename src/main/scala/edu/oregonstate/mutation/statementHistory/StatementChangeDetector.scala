@@ -37,7 +37,6 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
       }
     }.getChangedCommits
 
-    // add the first change, if it exists.
     val beforeChanges = if (lastBit.getLine != -1)
       lastBit.getChangedCommits.reverse.+:(new CommitInfo(before(0), "ADD"))
     else
@@ -48,7 +47,7 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
 
   private def processPair(pair: Seq[String], path: String, line: Int, propagateForward: Boolean): Option[ChangeInfo] = {
     if (pair.size != 2)
-      return None
+    return None
 
     val oldCommit = if (propagateForward) pair(0) else pair(1)
     val newCommit = if (propagateForward) pair(1) else pair(0)
@@ -56,10 +55,10 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
     val astDiff = new ASTDiff
     val oldTree = astDiff.getTree(GitUtil.getFileContent(git, oldCommit, path))
     val newTree = astDiff.getTree(GitUtil.getFileContent(git, newCommit, path))
-    var statement = if (propagateForward)
-      new StatementFinder(repo.getAbsolutePath).findStatement(line, oldTree.asInstanceOf[JdtTree].getContainedNode)
+    val statement = if (propagateForward)
+    new StatementFinder(repo.getAbsolutePath).findStatement(line, oldTree.asInstanceOf[JdtTree].getContainedNode)
     else
-      new StatementFinder(repo.getAbsolutePath).findStatement(line, newTree.asInstanceOf[JdtTree].getContainedNode)
+    new StatementFinder(repo.getAbsolutePath).findStatement(line, newTree.asInstanceOf[JdtTree].getContainedNode)
     val (actions, matchings) = astDiff.getActions(oldTree, newTree)
 
     val nextLine = getNextLine(statement, matchings, propagateForward)
@@ -139,7 +138,7 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
   }
 
   private def findFullPath(commit: RevCommit, path: String): String = {
-    var diffs = GitUtil.getDiffs(git, commit)
+    val diffs = GitUtil.getDiffs(git, commit)
     diffs.filter(diff => {
       diff.getNewPath.endsWith(path)
     })(0).getNewPath
