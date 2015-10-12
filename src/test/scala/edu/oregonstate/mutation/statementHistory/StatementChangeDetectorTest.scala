@@ -123,4 +123,15 @@ class StatementChangeDetectorTest extends GitTest {
     commits should have size expected.size
     commits should equal (expected)
   }
+
+  it should "find before and after" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("A.java", "public class A{\npublic void m(){\nint x=32;\n}\n}")
+    val third = add("A.java", "public class A{\npublic void m(){\\nint x=4;\n}\n}")
+    val expected=Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"), ci(third.getName, "UPDATE"))
+
+    val commits = nd(repo.getAbsolutePath, second.getName).findCommits("A.java", 3)
+    commits should have size expected.size
+    commits should equal (expected)
+  }
 }
