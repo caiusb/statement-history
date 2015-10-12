@@ -15,7 +15,6 @@ import scala.collection.JavaConversions
 class StatementChangeDetector(private val repo: File, private val sha: String) {
 
   private val git = Git.open(repo)
-  private val finder = new StatementFinder(repo.getAbsolutePath)
 
   def this(repo: String, sha: String) = this(new File(repo), sha)
 
