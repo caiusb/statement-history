@@ -13,10 +13,10 @@ class StatementFinder(repo: String) {
   def findStatement(commitSHA: String, file: String, lineNumber: Int): Statement = {
     val content: String = GitUtil.getFileContent(git, commitSHA, file)
     val ast: ASTNode = AST.getAST(content)
-    findStatement(lineNumber, content, ast)
+    findStatement(lineNumber, ast)
   }
 
-  def findStatement(lineNumber: Int, content: String, ast: ASTNode): Statement = {
+  def findStatement(lineNumber: Int, ast: ASTNode): Statement = {
     val visitor = new StatementVisitor()
     ast.accept(visitor)
     visitor.getStatementMap.get(lineNumber - 1) match {

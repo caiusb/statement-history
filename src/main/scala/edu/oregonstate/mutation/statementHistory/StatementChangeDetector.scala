@@ -12,7 +12,7 @@ import org.gitective.core.CommitUtils
 
 import scala.collection.JavaConversions
 
-class StatementChangeDetector(repo: File, sha: String) {
+class StatementChangeDetector(private val repo: File, private val sha: String) {
 
   private var git = Git.open(repo)
   private val finder = new StatementFinder(repo.getAbsolutePath)
@@ -21,126 +21,126 @@ class StatementChangeDetector(repo: File, sha: String) {
 
   def findCommits(filePath: String, lineNo: Int): Seq[CommitInfo] =
     findCommits(filePath, lineNo, "HEAD")
+
   def findCommits(filePath: String, lineNo: Int, commit: String): Seq[CommitInfo] = {
-    val before = new FileFinder(repo.getAbsolutePath).findAll(filePath, sha)
-    val after = new FileFinder(repo.getAbsolutePath).findAll(filePath, "HEAD").filter(commit => {
-      !before.contains(commit)
-    })
+    val finder = new FileFinder(repo.getAbsolutePath)
+    val fullPath = findFullPath(GitUtil.getCommit(git, commit), filePath)
+    val before = finder.findAll(fullPath, commit)
+    val after = finder.findAll(fullPath, "HEAD").filter(c => !before.contains(c)) :+ before.last
 
-    val fullPath = findFullPath(CommitUtils.getCommit(git.getRepository, commit), filePath)
+    val lastBit = before.reverse.sliding(2).foldLeft(new ChangeInfo(lineNo, List())){ (change, pair) =>
+      processPair(pair, fullPath, change.getLine, false) match {
+        case Some(x) => change.merge(x)
+        case None => change
+      }
+    }
+    val afterChanges = after.sliding(2).foldLeft(new ChangeInfo(lineNo, List())){ (change, pair) =>
+      processPair(pair, fullPath, change.getLine, true) match {
+        case Some(x) => change.merge(x)
+        case None => change
+      }
+    }.getChangedCommits
 
-    val beforeResults = before.reverse.sliding(2)
-      .foldLeft(new ChangeInfo(lineNo, Seq())){(c, l) => processPair(c, l, fullPath, findOldLine)}
-
-    if (beforeResults.getLine != -1)
-      beforeResults.copy(-1, new CommitInfo(before(0), "ADD")).getChangedCommits.reverse
+    // add the first change, if it exists.
+    val beforeChanges = if (lastBit.getLine != -1)
+      lastBit.getChangedCommits.reverse.+:(new CommitInfo(before(0), "ADD"))
     else
-      beforeResults.getChangedCommits.reverse
+      lastBit.getChangedCommits.reverse
+
+    beforeChanges ++ afterChanges
   }
 
+  private def processPair(pair: Seq[String], path: String, line: Int, propagateForward: Boolean): Option[ChangeInfo] = {
+    if (pair.size != 2)
+      return None
 
-  private def processPair(c: ChangeInfo,
-                          l: Seq[String],
-                          fullPath: String,
-                          getNextLine:(Statement, MappingStore) => Int): ChangeInfo = {
-    val newer = l(0)
-    val older = l(1)
+    val oldCommit = if (propagateForward) pair(0) else pair(1)
+    val newCommit = if (propagateForward) pair(1) else pair(0)
 
-    if (c.getLine == -1)
-      return c
+    val astDiff = new ASTDiff
+    val oldTree = astDiff.getTree(GitUtil.getFileContent(git, oldCommit, path))
+    val newTree = astDiff.getTree(GitUtil.getFileContent(git, newCommit, path))
+    var statement = if (propagateForward)
+      new StatementFinder(repo.getAbsolutePath).findStatement(line, oldTree.asInstanceOf[JdtTree].getContainedNode)
+    else
+      new StatementFinder(repo.getAbsolutePath).findStatement(line, newTree.asInstanceOf[JdtTree].getContainedNode)
+    val (actions, matchings) = astDiff.getActions(oldTree, newTree)
 
-    val diff = new ASTDiff
-    val newerContent = finder.getFileContent(newer, fullPath)
-    val newerTree = diff.getTree(newerContent)
-    val statement = finder.findStatement(c.getLine, newerContent, newerTree.asInstanceOf[JdtTree].getContainedNode)
-    val olderTree = diff.getTree(finder.getFileContent(older, fullPath))
-    val (actions, matchings) = diff.getActions(olderTree, newerTree)
-    val nextLine = getNextLine(statement, matchings)
-    val relevantActions = actions.filter(action => {
+    val nextLine = getNextLine(statement, matchings, propagateForward)
+    var matchingActions = processActions(actions, matchings, propagateForward)
+    val statementActions = getActionsTouchingStatement(statement, matchingActions)
+    statementActions.foreach(action => {
       action match {
-        case _: Insert => nextLine == -1
-        case _: Delete => false
-        case _ =>
-          val node = matchings.getDst(action.getNode).asInstanceOf[JdtTree].getContainedNode
-          isInStatement(statement, node)
+        case _: Update => return Some(new ChangeInfo(nextLine, Seq(new CommitInfo(newCommit, "UPDATE"))))
+        case _: Move => return Some(new ChangeInfo(nextLine, Seq(new CommitInfo(newCommit, "MOVE"))))
+        case _: Insert if nextLine == -1 => return Some(new ChangeInfo(nextLine, Seq(new CommitInfo(newCommit, "ADD"))))
+        case _: Delete if nextLine == -1 => return Some(new ChangeInfo(nextLine, Seq(new CommitInfo(newCommit, "DELETE"))))
+        case _ => ;
       }
     })
-
-    if(!relevantActions.contains(isUpdate))
-      relevantActions.withFilter(action => {
-        action.getNode.asInstanceOf[JdtTree].getContainedNode == statement
-      })
-    else
-      relevantActions.withFilter(isUpdate)
-
-    relevantActions.foldLeft(c)((c, changedStatement) =>
-      changedStatement match {
-        case _: Insert => c.copy(nextLine, new CommitInfo(newer, "ADD"))
-        case _: Update => c.copy(nextLine, new CommitInfo(newer, "UPDATE"))
-        case _: Move => c.copy(nextLine, new CommitInfo(newer, "MOVE"))
-        case _ => c.copy(nextLine);
-      })
+    return None
   }
 
-  private def trackStatement(older: String, newer: String): String = {
-    return ""
-  }
-
-  def isUpdate: (Action) => Boolean =
-    action => action match {
-      case _: Update => true
-      case _ => false
+  def processActions(actions: Seq[Action], matchings: MappingStore, propagateForward: Boolean): Seq[Action] = {
+    if (!propagateForward) {
+      actions.map(action => action match {
+        case m: Update => new Update(matchings.getDst(m.getNode), "0")
+        case m: Move =>
+          val node = matchings.getDst(m.getNode)
+          new Move(node, node.getParent, 1)
+        case m => m
+      })
+    } else {
+      actions
     }
+  }
 
-  def convertMatching(matchings: MappingStore): List[(ASTNode, ASTNode)] = {
-    var list = List[(ASTNode, ASTNode)]()
-    JavaConversions.asScalaIterator(matchings.iterator()).foreach(m => {
-      val first = m.getFirst.asInstanceOf[JdtTree].getContainedNode
-      val second = m.getSecond.asInstanceOf[JdtTree].getContainedNode
-      list = list.+:(first,second)
+  private def getActionsTouchingStatement(statement: Statement, actions: Seq[Action]): Seq[Action] = {
+    actions.filter(action => {
+      val node = action.getNode.asInstanceOf[JdtTree].getContainedNode
+      isInStatement(node, statement)
+    }).sortWith((first, second) => {
+      second match {
+        case _: Update => first match {
+          case _: Insert => false
+          case _ => true
+        }
+        case _ => true
+      }
     })
-    list
   }
 
-  def findOldLine(statement: Statement, matchings: MappingStore): Int =
-    findOldLine(statement, convertMatching(matchings))
-
-  def findOldLine(statement: Statement, m: List[(ASTNode, ASTNode)]): Int =
-    m match {
-      case first :: rest =>
-        first match {
-          case (x, s) if (s == statement) =>
-            getLineNumber(x)
-          case _ => findOldLine(statement, rest)
+  private def getNextLine(statement: Statement, matchings: MappingStore, followForward: Boolean): Int = {
+    convertToTuples(matchings).foreach(tupple => {
+      if (followForward)
+        tupple match {
+          case (s, x) if s == statement =>
+            return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
+          case _ => ;
         }
-      case Nil => -1
-    }
-
-
-  def findNewLine(statement: Statement, matchings: MappingStore): Int =
-    findNewLine(statement, convertMatching(matchings))
-
-  def findNewLine(statement: Statement, m: List[(ASTNode, ASTNode)]): Int =
-    m match {
-      case first :: rest =>
-        first match {
-          case (s, x) if (s == statement) =>
-            getLineNumber(x)
-          case _ => findNewLine(statement, rest)
+      else
+        tupple match {
+          case (x, s) if s == statement =>
+            return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
+          case _ => ;
         }
-      case Nil => -1
-    }
+    })
+    return -1
+  }
 
-  private def getLineNumber(node: ASTNode): Int =
-    node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(node.getStartPosition)
+  private def convertToTuples(matchings: MappingStore): List[(ASTNode, ASTNode)] = {
+    JavaConversions.asScalaIterator(matchings.iterator).map(matching => {
+      (matching.getFirst.asInstanceOf[JdtTree].getContainedNode,
+        matching.getSecond.asInstanceOf[JdtTree].getContainedNode)
+    }).toList
+  }
 
-  private def isInStatement(stmt: Statement, node: ASTNode): Boolean = {
+  private def isInStatement(node: ASTNode, statement: Statement): Boolean = {
     if (node == null)
       return false
-    if (node.equals(stmt))
+    if (node.equals(statement))
       return true
-
-    isInStatement(stmt, node.getParent)
+    isInStatement(node.getParent, statement)
   }
 
   private def findFullPath(commit: RevCommit, path: String): String = {
