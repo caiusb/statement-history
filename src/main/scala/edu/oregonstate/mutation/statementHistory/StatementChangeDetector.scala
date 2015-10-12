@@ -19,10 +19,7 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
 
   def this(repo: String, sha: String) = this(new File(repo), sha)
 
-  def findCommits(filePath: String, lineNo: Int): Seq[CommitInfo] =
-    findCommits(filePath, lineNo, "HEAD")
-
-  def findCommits(filePath: String, lineNo: Int, commit: String): Seq[CommitInfo] = {
+  def findCommits(filePath: String, lineNo: Int, commit: String = sha): Seq[CommitInfo] = {
     val finder = new FileFinder(repo.getAbsolutePath)
     val fullPath = findFullPath(GitUtil.getCommit(git, commit), filePath)
     val before = finder.findAll(fullPath, commit)
