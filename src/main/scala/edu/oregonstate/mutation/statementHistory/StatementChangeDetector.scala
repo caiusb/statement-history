@@ -23,7 +23,7 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
     val finder = new FileFinder(repo.getAbsolutePath)
     val fullPath = findFullPath(GitUtil.getCommit(git, commit), filePath)
     val before = finder.findAll(fullPath, commit)
-    val after = finder.findAll(fullPath, "HEAD").filter(c => !before.contains(c)) :+ before.last
+    val after = finder.findAll(fullPath, "HEAD").filter(c => !before.contains(c)).+:(before.last)
 
     val lastBit = before.reverse.sliding(2).foldLeft(new ChangeInfo(lineNo, List())){ (change, pair) =>
       processPair(pair, fullPath, change.getLine, false) match {
