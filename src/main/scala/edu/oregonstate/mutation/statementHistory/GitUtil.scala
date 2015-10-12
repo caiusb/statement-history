@@ -4,7 +4,7 @@ import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.{RawTextComparator, DiffFormatter, DiffEntry}
 import org.eclipse.jgit.revwalk.{RevTree, RevCommit}
 import org.eclipse.jgit.util.io.DisabledOutputStream
-import org.gitective.core.BlobUtils
+import org.gitective.core.{CommitUtils, BlobUtils}
 
 import scala.collection.JavaConversions
 
@@ -31,4 +31,9 @@ object GitUtil {
       case null => ""
     }
   }
+
+  def getCommit(git: Git, sha: String): RevCommit = {
+    CommitUtils.getCommit(git.getRepository, sha)
+  }
+
 }
