@@ -82,17 +82,6 @@ class StatementChangeDetectorTest extends GitTest {
     commits should equal(expected)
   }
 
-  it should "start at given commit" in {
-    val first = add("src/A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
-    val second = add("src/A.java", "public class A{\npublic void m(){\nint x=15;\n}\n}")
-    val third = add("src/A.java", "public class A{\npublic void m(){\nint x=22;\n}\n}")
-    val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"UPDATE"))
-
-    val commits = nd(repo.getAbsolutePath, second.getName).findCommits("A.java", 3)
-    commits should have size 2
-    commits should equal(expected)
-  }
-
   it should "use given commit to find statement at line number" in {
     val first = add("src/A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
     val second = add("src/A.java", "public class A{\npublic void m(){\n\nint x=15;\n}\n}")
