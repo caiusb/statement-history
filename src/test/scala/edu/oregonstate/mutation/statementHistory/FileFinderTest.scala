@@ -57,4 +57,14 @@ class FileFinderTest extends GitTest {
     all should have size expected.size
     all should equal (expected)
   }
+
+  it should "find part of the history" in {
+    var first = add("A.java", "public class A{}")
+    val second = add("A.java", "public class A2{}")
+    var third = add("A.java", "public class A3{}")
+    val expected = List(first.getName, second.getName)
+    val all = fileFinder.findAll("A.java", second.getName)
+    all should have size expected.size
+    all should equal (expected)
+  }
 }

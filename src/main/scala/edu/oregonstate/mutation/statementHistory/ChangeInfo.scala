@@ -17,6 +17,10 @@ protected class ChangeInfo(private var nextLine: Int,
     new ChangeInfo(nextLine, commitInfos)
   }
 
+  def merge(info: ChangeInfo): ChangeInfo = {
+    new ChangeInfo(info.getLine, commitInfos ++ info.getChangedCommits)
+  }
+
   def getChangedCommits: Seq[CommitInfo] = commitInfos
 
   def getLine: Int = nextLine
