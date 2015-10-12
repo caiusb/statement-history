@@ -14,7 +14,7 @@ import scala.collection.JavaConversions
 
 class StatementChangeDetector(private val repo: File, private val sha: String) {
 
-  private var git = Git.open(repo)
+  private val git = Git.open(repo)
   private val finder = new StatementFinder(repo.getAbsolutePath)
 
   def this(repo: String, sha: String) = this(new File(repo), sha)
@@ -79,7 +79,7 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
   }
 
   def processActions(actions: Seq[Action], matchings: MappingStore, propagateForward: Boolean): Seq[Action] = {
-    if (!propagateForward) {
+    if (!propagateForward)
       actions.map(action => action match {
         case m: Update => new Update(matchings.getDst(m.getNode), "0")
         case m: Move =>
@@ -87,9 +87,8 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
           new Move(node, node.getParent, 1)
         case m => m
       })
-    } else {
+    else
       actions
-    }
   }
 
   private def getActionsTouchingStatement(statement: Statement, actions: Seq[Action]): Seq[Action] = {
