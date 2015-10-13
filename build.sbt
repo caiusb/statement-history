@@ -25,7 +25,7 @@ mainClass in assembly := mc
 lazy val root = (project in file(".")).
   settings(
     name := "statement-history",
-    version := "0.2"
+    version := "0.3"
   )
 
 lazy val versionReport = TaskKey[String]("version-report")
