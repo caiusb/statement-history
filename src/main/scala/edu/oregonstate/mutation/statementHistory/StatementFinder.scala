@@ -8,7 +8,7 @@ import org.gitective.core.BlobUtils
 
 object StatementFinder extends NodeFinder {
 
-  override def findNode(git: Git, lineNumber: Int, ast: ASTNode): ASTNode = {
+  override def findNode(lineNumber: Int, ast: ASTNode): ASTNode = {
     val visitor = new StatementVisitor()
     ast.accept(visitor)
     visitor.getStatementMap.get(lineNumber - 1) match {
