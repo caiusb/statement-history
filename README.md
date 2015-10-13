@@ -14,5 +14,9 @@ idea`. You can also simply import the project into Idea, and it should work
 fine.
 
 ## Licence ##
+I use [Travis CI](http://travis-ci.org) for continous integration: [![Build Status](https://travis-ci.org/caiusb/statement-history.svg)](https://travis-ci.org/caiusb/statement-history)
+
+I use [Corvalls](http://coveralls.io) for test coverage: [![Coverage Status](https://coveralls.io/repos/caiusb/statement-history/badge.svg?branch=master&service=github)](https://coveralls.io/github/caiusb/statement-history?branch=master)
+
 
 This code is distributed under the MIT License.
