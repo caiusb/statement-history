@@ -35,7 +35,7 @@ object Main {
   private def doAnalysis(config: Config): Unit = {
     disableLoggers()
 
-    val detector = new StatementChangeDetector(config.repo, config.commit)
+    val detector = new NodeChangeDetector(config.repo, StatementFinder)
     val mutants = JSONDecoder.decode(config.jsonFile)
 
     val result = mutants.toParArray.map(mutant => {

@@ -3,8 +3,8 @@ package edu.oregonstate.mutation.statementHistory
 class StatementChangeDetectorTest extends GitTest {
 
   private def ci(a: String, b:String): CommitInfo = new CommitInfo(a, b)
-  private def nd(repo: String): StatementChangeDetector = nd(repo, "HEAD")
-  private def nd(repo: String, sha: String): StatementChangeDetector = new StatementChangeDetector(repo, sha)
+  private def nd(repo: String): NodeChangeDetector = nd(repo, StatementFinder)
+  private def nd(repo: String, finder: NodeFinder): NodeChangeDetector = new NodeChangeDetector(repo, StatementFinder)
 
   it should "find a statement change in two consecutive commits" in {
     val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
@@ -88,7 +88,7 @@ class StatementChangeDetectorTest extends GitTest {
     val third = add("src/A.java", "public class A{\npublic void m(){\nint x=22;\n}\n}")
     val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"UPDATE"), ci(third.getName,"UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath, second.getName).findCommits("A.java", 4)
+    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 4, second.getName)
     commits should have size 3
     commits should equal(expected)
   }
@@ -130,7 +130,7 @@ class StatementChangeDetectorTest extends GitTest {
     val third = add("A.java", "public class A{\npublic void m(){\nint x=4;\n}\n}")
     val expected=Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"), ci(third.getName, "UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath, second.getName).findCommits("A.java", 3)
+    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 3, second.getName)
     commits should have size expected.size
     commits should equal (expected)
   }

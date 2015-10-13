@@ -6,17 +6,9 @@ import org.eclipse.jdt.core.dom.{ASTNode, Statement}
 import org.eclipse.jgit.api.Git
 import org.gitective.core.BlobUtils
 
-class StatementFinder(repo: String) {
+object StatementFinder extends NodeFinder {
 
-  val git = Git.open(new File(repo))
-
-  def findStatement(commitSHA: String, file: String, lineNumber: Int): Statement = {
-    val content: String = GitUtil.getFileContent(git, commitSHA, file)
-    val ast: ASTNode = AST.getAST(content)
-    findStatement(lineNumber, ast)
-  }
-
-  def findStatement(lineNumber: Int, ast: ASTNode): Statement = {
+  override def findNode(git: Git, lineNumber: Int, ast: ASTNode): ASTNode = {
     val visitor = new StatementVisitor()
     ast.accept(visitor)
     visitor.getStatementMap.get(lineNumber - 1) match {

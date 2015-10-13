@@ -12,13 +12,13 @@ import org.gitective.core.CommitUtils
 
 import scala.collection.JavaConversions
 
-class StatementChangeDetector(private val repo: File, private val sha: String) {
+class NodeChangeDetector(private val repo: File, private val finder: NodeFinder) {
 
   private val git = Git.open(repo)
 
-  def this(repo: String, sha: String) = this(new File(repo), sha)
+  def this(repo: String, finder: NodeFinder) = this(new File(repo), finder)
 
-  def findCommits(filePath: String, lineNo: Int, commit: String = sha): Seq[CommitInfo] = {
+  def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD"): Seq[CommitInfo] = {
     val finder = new FileFinder(repo.getAbsolutePath)
     val fullPath = findFullPath(GitUtil.getCommit(git, commit), filePath)
     val before = finder.findAll(fullPath, commit)
@@ -56,14 +56,14 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
     val oldTree = astDiff.getTree(GitUtil.getFileContent(git, oldCommit, path))
     val newTree = astDiff.getTree(GitUtil.getFileContent(git, newCommit, path))
     val statement = if (propagateForward)
-    new StatementFinder(repo.getAbsolutePath).findStatement(line, oldTree.asInstanceOf[JdtTree].getContainedNode)
+    finder.findNode(git, line, oldTree.asInstanceOf[JdtTree].getContainedNode)
     else
-    new StatementFinder(repo.getAbsolutePath).findStatement(line, newTree.asInstanceOf[JdtTree].getContainedNode)
+    finder.findNode(git, line, newTree.asInstanceOf[JdtTree].getContainedNode)
     val (actions, matchings) = astDiff.getActions(oldTree, newTree)
 
     val nextLine = getNextLine(statement, matchings, propagateForward)
     var matchingActions = processActions(actions, matchings, propagateForward)
-    val statementActions = getActionsTouchingStatement(statement, matchingActions)
+    val statementActions = getActionsTouchingNode(statement, matchingActions)
     statementActions.foreach(action => {
       action match {
         case _: Update => return Some(new ChangeInfo(nextLine, Seq(new CommitInfo(newCommit, "UPDATE"))))
@@ -89,10 +89,10 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
       actions
   }
 
-  private def getActionsTouchingStatement(statement: Statement, actions: Seq[Action]): Seq[Action] = {
+  private def getActionsTouchingNode(statement: ASTNode, actions: Seq[Action]): Seq[Action] = {
     actions.filter(action => {
       val node = action.getNode.asInstanceOf[JdtTree].getContainedNode
-      isInStatement(node, statement)
+      isInNode(node, statement)
     }).sortWith((first, second) => {
       second match {
         case _: Update => first match {
@@ -104,17 +104,17 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
     })
   }
 
-  private def getNextLine(statement: Statement, matchings: MappingStore, followForward: Boolean): Int = {
+  private def getNextLine(astNode: ASTNode, matchings: MappingStore, followForward: Boolean): Int = {
     convertToTuples(matchings).foreach(tupple => {
       if (followForward)
         tupple match {
-          case (s, x) if s == statement =>
+          case (s, x) if s == astNode =>
             return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
           case _ => ;
         }
       else
         tupple match {
-          case (x, s) if s == statement =>
+          case (x, s) if s == astNode =>
             return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
           case _ => ;
         }
@@ -129,12 +129,12 @@ class StatementChangeDetector(private val repo: File, private val sha: String) {
     }).toList
   }
 
-  private def isInStatement(node: ASTNode, statement: Statement): Boolean = {
+  def isInNode(node: ASTNode, target: ASTNode): Boolean = {
     if (node == null)
       return false
-    if (node.equals(statement))
+    if (node.equals(target))
       return true
-    isInStatement(node.getParent, statement)
+    isInNode(node.getParent, target)
   }
 
   private def findFullPath(commit: RevCommit, path: String): String = {
