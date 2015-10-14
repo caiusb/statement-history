@@ -12,4 +12,8 @@ class CommitInfoTest extends FlatSpec with Matchers {
     new CommitInfo("abced", "ADD").equals(new CommitInfo("adced", "UPDATE")) should be (false)
     new CommitInfo("abced", "ADD").equals(Seq()) should be (false)
   }
+
+  it should "give the correct string" in {
+    new CommitInfo("abced", "ADD").toString should equal ("abced,ADD")
+  }
 }
