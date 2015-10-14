@@ -52,14 +52,13 @@ class NodeChangeDetector(private val repo: File, private val finder: NodeFinder)
     val oldCommit = if (propagateForward) pair(0) else pair(1)
     val newCommit = if (propagateForward) pair(1) else pair(0)
 
-    val astDiff = new ASTDiff
-    val oldTree = astDiff.getTree(GitUtil.getFileContent(git, oldCommit, path))
-    val newTree = astDiff.getTree(GitUtil.getFileContent(git, newCommit, path))
+    val oldTree = ASTDiff.getTree(GitUtil.getFileContent(git, oldCommit, path))
+    val newTree = ASTDiff.getTree(GitUtil.getFileContent(git, newCommit, path))
     val statement = if (propagateForward)
     finder.findNode(line, oldTree.asInstanceOf[JdtTree].getContainedNode)
     else
     finder.findNode(line, newTree.asInstanceOf[JdtTree].getContainedNode)
-    val (actions, matchings) = astDiff.getActions(oldTree, newTree)
+    val (actions, matchings) = ASTDiff.getActions(oldTree, newTree)
 
     val nextLine = getNextLine(statement, matchings, propagateForward)
     var matchingActions = processActions(actions, matchings, propagateForward)

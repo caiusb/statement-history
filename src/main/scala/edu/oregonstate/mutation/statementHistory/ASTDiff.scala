@@ -9,7 +9,7 @@ import fr.labri.gumtree.tree.Tree
 /**
  * Created by caius on 9/24/15.
  */
-class ASTDiff {
+object ASTDiff {
 
   def getActions(AContent:String, BContent:String): (Seq[Action], MappingStore) = {
     var jdtTreeGenerator = new JdtTreeGenerator()
@@ -35,5 +35,4 @@ class ASTDiff {
     var jdtTreeGenerator = new JdtTreeGenerator();
     getTree(content, jdtTreeGenerator);
   }
-
 }
