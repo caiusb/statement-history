@@ -10,6 +10,7 @@ import fr.labri.gumtree.tree.Tree
  * Created by caius on 9/24/15.
  */
 class ASTDiff {
+
   def getActions(AContent:String, BContent:String): (Seq[Action], MappingStore) = {
     var jdtTreeGenerator = new JdtTreeGenerator()
     var leftTree = getTree(AContent, jdtTreeGenerator)
