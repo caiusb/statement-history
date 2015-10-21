@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/caiusb/statement-history.png?label=ready&title=Ready)](https://waffle.io/caiusb/statement-history)
 ### Statement Finder ###
 
 This project tracks a statement through history and finds the commits that
