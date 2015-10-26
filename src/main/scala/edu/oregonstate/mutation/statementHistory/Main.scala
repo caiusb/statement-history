@@ -15,7 +15,7 @@ object Main {
   }
 
   private def parseCmdOptions(args: Array[String]): Option[Config] = {
-    val parser = new scopt.OptionParser[Config]("scopt") {
+    val parser = new scopt.OptionParser[Config]("java -jar <jar_name>") {
       opt[Boolean]('m', "method") action { (x,c) =>
           c.copy(method = x)
         } text ("track methods; default is false, it tracks statements")
