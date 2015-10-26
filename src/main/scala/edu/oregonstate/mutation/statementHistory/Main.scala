@@ -1,6 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
-import java.io.File
+import java.io.{FileOutputStream, PrintStream, OutputStream, File}
 import java.util.logging.Level
 
 import fr.labri.gumtree.matchers.Matcher
@@ -10,7 +10,8 @@ object Main {
   private case class Config(method: Boolean = false,
                         repo: File = new File("."),
                         jsonFile: File = new File("."),
-                        commit: String = "HEAD") {
+                        commit: String = "HEAD",
+                        file:Option[String] = None) {
   }
 
   private def parseCmdOptions(args: Array[String]): Option[Config] = {
@@ -27,6 +28,9 @@ object Main {
       opt[String]('c', "commit") action{ (x,c) =>
         c.copy(commit = x)
       } text("The commit to reference the line number to; default is HEAD")
+      opt[String]('f', "output-file") action { (x,c) =>
+        c.copy(file = Some(x))
+      } text("The output file")
     }
 
     parser.parse(args, Config())
@@ -42,13 +46,18 @@ object Main {
     val detector = new NodeChangeDetector(config.repo, finder)
     val mutants = JSONDecoder.decode(config.jsonFile)
 
+    val outputStream = config.file match {
+      case Some(x) => new PrintStream(new FileOutputStream(new File(x)))
+      case None => System.out
+    }
+
     val result = mutants.toParArray.map(mutant => {
       mutant.getFileName + "," + mutant.getLineNumber + "," +
         detector.findCommits(mutant.getFileName, mutant.getLineNumber).map(commit => commit + ",").
           foldRight[String]("")((c, e) => c + e) + "\n"
     }).asParSeq.reduceRight((current, element) => current + element)
 
-    print(result)
+    outputStream.write(result.getBytes)
   }
 
   private def disableLoggers() = {
