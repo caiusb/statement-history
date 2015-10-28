@@ -38,7 +38,6 @@ class NodeChangeDetector(private val repo: File, private val finder: NodeFinder)
     else
       Seq()
 
-
     beforeChanges ++ afterChanges
   }
 
