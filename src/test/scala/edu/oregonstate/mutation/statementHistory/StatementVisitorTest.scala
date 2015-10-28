@@ -1,8 +1,8 @@
 package edu.oregonstate.mutation.statementHistory
 
+import edu.oregonstate.mutation.statementHistory.AST._
 import org.eclipse.jdt.core.dom.Statement
 import org.scalatest._
-import AST._
 
 class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
 

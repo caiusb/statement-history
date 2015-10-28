@@ -1,6 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 /**
  * Created by caius on 10/14/15.

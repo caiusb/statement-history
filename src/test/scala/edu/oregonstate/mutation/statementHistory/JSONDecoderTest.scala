@@ -1,8 +1,8 @@
 package edu.oregonstate.mutation.statementHistory
 
-import java.io.{StringReader, File}
+import java.io.File
 
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.io.Source
 

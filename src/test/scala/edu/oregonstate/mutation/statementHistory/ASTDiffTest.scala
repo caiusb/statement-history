@@ -1,7 +1,7 @@
 package edu.oregonstate.mutation.statementHistory
 
 import fr.labri.gumtree.actions.model.Update
-import org.scalatest.{Matchers, FlatSpec}
+import org.scalatest.{FlatSpec, Matchers}
 
 /**
  * Created by caius on 10/14/15.

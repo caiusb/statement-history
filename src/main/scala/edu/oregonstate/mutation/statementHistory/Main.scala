@@ -1,6 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
-import java.io.{FileOutputStream, PrintStream, OutputStream, File}
+import java.io.{File, FileOutputStream, PrintStream}
 import java.util.logging.Level
 
 import fr.labri.gumtree.matchers.Matcher

@@ -1,10 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
-import java.io.File
-
-import org.eclipse.jdt.core.dom.{ASTNode, Statement}
-import org.eclipse.jgit.api.Git
-import org.gitective.core.BlobUtils
+import org.eclipse.jdt.core.dom.ASTNode
 
 object StatementFinder extends NodeFinder {
 

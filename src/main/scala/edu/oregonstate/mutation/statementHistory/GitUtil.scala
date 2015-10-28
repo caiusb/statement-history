@@ -1,10 +1,10 @@
 package edu.oregonstate.mutation.statementHistory
 
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.diff.{RawTextComparator, DiffFormatter, DiffEntry}
-import org.eclipse.jgit.revwalk.{RevTree, RevCommit}
+import org.eclipse.jgit.diff.{DiffEntry, DiffFormatter, RawTextComparator}
+import org.eclipse.jgit.revwalk.{RevCommit, RevTree}
 import org.eclipse.jgit.util.io.DisabledOutputStream
-import org.gitective.core.{CommitUtils, BlobUtils}
+import org.gitective.core.{BlobUtils, CommitUtils}
 
 import scala.collection.JavaConversions
 

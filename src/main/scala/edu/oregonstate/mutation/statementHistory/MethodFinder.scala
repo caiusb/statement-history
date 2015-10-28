@@ -1,7 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.eclipse.jdt.core.dom.{CompilationUnit, MethodDeclaration, ASTVisitor, ASTNode}
-import org.eclipse.jgit.api.Git
+import org.eclipse.jdt.core.dom.{ASTNode, ASTVisitor, CompilationUnit, MethodDeclaration}
 
 /**
  * Created by caius on 10/12/15.

@@ -5,8 +5,8 @@ import java.util
 
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.DiffEntry
-import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
 import org.eclipse.jgit.revwalk.RevSort._
+import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 import org.gitective.core.CommitUtils
 
@@ -34,6 +34,7 @@ class FileFinder(repo: String) {
 
   def findAll(path: String, sha: String): Seq[String] = {
     import GitUtil._
+
     import scala.collection.JavaConversions._
 
     val first = findFirst(path, sha)

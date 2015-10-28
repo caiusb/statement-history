@@ -1,18 +1,12 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.eclipse.jgit.lib.Repository
-import java.io.File
-import org.eclipse.jgit.lib.Constants
-import org.eclipse.jgit.api.Git
-import org.scalatest.FlatSpec
-import org.scalatest.BeforeAndAfter
-import java.io.PrintWriter
-import java.nio.file.Path
+import java.io.{File, PrintWriter}
 import java.nio.file.Paths
-import org.eclipse.jgit.lib.PersonIdent
-import org.scalatest.Matchers
+
+import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.{Constants, PersonIdent}
 import org.eclipse.jgit.revwalk.RevCommit
-import org.scalatest.BeforeAndAfterEach
+import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
 
 
 trait GitTest extends FlatSpec with BeforeAndAfterEach with Matchers {
