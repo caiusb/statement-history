@@ -5,10 +5,9 @@ import java.io.File
 import fr.labri.gumtree.actions.model._
 import fr.labri.gumtree.gen.jdt.JdtTree
 import fr.labri.gumtree.matchers.MappingStore
-import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit, Statement}
+import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit}
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
-import org.gitective.core.CommitUtils
 
 import scala.collection.JavaConversions
 
@@ -18,20 +17,26 @@ class NodeChangeDetector(private val repo: File, private val finder: NodeFinder)
 
   def this(repo: String, finder: NodeFinder) = this(new File(repo), finder)
 
-  def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD"): Seq[CommitInfo] = {
+  def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD", order: Order.Value = Order.BOTH): Seq[CommitInfo] = {
     val finder = new FileFinder(repo.getAbsolutePath)
     val fullPath = findFullPath(GitUtil.getCommit(git, commit), filePath)
     val before = finder.findAll(fullPath, commit)
     val after = finder.findAll(fullPath, "HEAD").filter(c => !before.contains(c)).+:(before.last)
 
-    val lastBit = process(lineNo, fullPath, before.reverse, false)
+    val beforeChanges = if (order == Order.REVERSE || order == Order.BOTH) {
+      val lastBit = process(lineNo, fullPath, before.reverse, false)
 
-    val beforeChanges = if (lastBit.getLine != -1)
-      lastBit.getChangedCommits.reverse.+:(new CommitInfo(before(0), "ADD"))
+      if (lastBit.getLine != -1)
+        lastBit.getChangedCommits.reverse.+:(new CommitInfo(before(0), "ADD"))
+      else
+        lastBit.getChangedCommits.reverse
+    } else
+      Seq()
+
+    val afterChanges = if (order == Order.FORWARD || order == Order.BOTH)
+      process(lineNo, fullPath, after, true).getChangedCommits
     else
-      lastBit.getChangedCommits.reverse
-
-    val afterChanges = process(lineNo, fullPath, after, true).getChangedCommits
+      Seq()
 
 
     beforeChanges ++ afterChanges
