@@ -11,7 +11,9 @@ object Main {
                         repo: File = new File("."),
                         jsonFile: File = new File("."),
                         commit: String = "HEAD",
-                        file:Option[String] = None) {
+                        file:Option[String] = None,
+                        forward: Boolean = false,
+                        reverse: Boolean = false) {
   }
 
   private def parseCmdOptions(args: Array[String]): Option[Config] = {
@@ -31,6 +33,12 @@ object Main {
       opt[String]('f', "output-file") action { (x,c) =>
         c.copy(file = Some(x))
       } text("The output file")
+      opt[Boolean]('f', "forward") action { (x, c) =>
+        c.copy(forward = true)
+      } text("Perform the analysis only on the commits that follow the reference commit, exclusive")
+      opt[Boolean]('r', "reverse") action { (x, c) =>
+        c.copy(reverse = false)
+      } text("Perform the analysis only on the commits that preceed the referece commit, inclusive")
     }
 
     parser.parse(args, Config())
@@ -51,9 +59,16 @@ object Main {
       case None => System.out
     }
 
+    val order = if (config.forward)
+      Order.FORWARD
+    else if (config.reverse)
+      Order.REVERSE
+    else
+      Order.BOTH
+
     val result = mutants.toParArray.map(mutant => {
       mutant.getFileName + "," + mutant.getLineNumber + "," +
-        detector.findCommits(mutant.getFileName, mutant.getLineNumber).map(commit => commit + ",").
+        detector.findCommits(mutant.getFileName, mutant.getLineNumber, order = order).map(commit => commit + ",").
           foldRight[String]("")((c, e) => c + e) + "\n"
     }).asParSeq.reduceRight((current, element) => current + element)
 
