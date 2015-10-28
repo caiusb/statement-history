@@ -24,25 +24,27 @@ class NodeChangeDetector(private val repo: File, private val finder: NodeFinder)
     val before = finder.findAll(fullPath, commit)
     val after = finder.findAll(fullPath, "HEAD").filter(c => !before.contains(c)).+:(before.last)
 
-    val lastBit = before.reverse.sliding(2).foldLeft(new ChangeInfo(lineNo, List())){ (change, pair) =>
-      processPair(pair, fullPath, change.getLine, false) match {
-        case Some(x) => change.merge(x)
-        case None => change
-      }
-    }
-    val afterChanges = after.sliding(2).foldLeft(new ChangeInfo(lineNo, List())){ (change, pair) =>
-      processPair(pair, fullPath, change.getLine, true) match {
-        case Some(x) => change.merge(x)
-        case None => change
-      }
-    }.getChangedCommits
+    val lastBit = process(lineNo, fullPath, before.reverse, false)
 
     val beforeChanges = if (lastBit.getLine != -1)
       lastBit.getChangedCommits.reverse.+:(new CommitInfo(before(0), "ADD"))
     else
       lastBit.getChangedCommits.reverse
 
+    val afterChanges = process(lineNo, fullPath, after, true).getChangedCommits
+
+
     beforeChanges ++ afterChanges
+  }
+
+  def process(lineNo: Int, fullPath: String, commits: Seq[String], isReversed: Boolean): ChangeInfo = {
+    val lastBit = commits.sliding(2).foldLeft(new ChangeInfo(lineNo, List())) { (change, pair) =>
+      processPair(pair, fullPath, change.getLine, isReversed) match {
+        case Some(x) => change.merge(x)
+        case None => change
+      }
+    }
+    lastBit
   }
 
   private def processPair(pair: Seq[String], path: String, line: Int, propagateForward: Boolean): Option[ChangeInfo] = {
