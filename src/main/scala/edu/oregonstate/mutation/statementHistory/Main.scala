@@ -59,12 +59,7 @@ object Main {
       case None => System.out
     }
 
-    val order = if (config.forward)
-      Order.FORWARD
-    else if (config.reverse)
-      Order.REVERSE
-    else
-      Order.BOTH
+    val order = getAnalysisOrder(config)
 
     val result = mutants.toParArray.map(mutant => {
       mutant.getFileName + "," + mutant.getLineNumber + "," +
@@ -73,6 +68,15 @@ object Main {
     }).asParSeq.reduceRight((current, element) => current + element)
 
     outputStream.write(result.getBytes)
+  }
+
+  private[statementHistory] def getAnalysisOrder(config: Config): Order.Value = {
+    if (config.forward)
+      Order.FORWARD
+    else if (config.reverse)
+      Order.REVERSE
+    else
+      Order.BOTH
   }
 
   private def disableLoggers() = {
