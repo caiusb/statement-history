@@ -7,7 +7,7 @@ import fr.labri.gumtree.matchers.Matcher
 
 object Main {
 
-  private case class Config(method: Boolean = false,
+  private[statementHistory] case class Config(method: Boolean = false,
                         repo: File = new File("."),
                         jsonFile: File = new File("."),
                         commit: String = "HEAD",
@@ -16,7 +16,7 @@ object Main {
                         reverse: Boolean = false) {
   }
 
-  private def parseCmdOptions(args: Array[String]): Option[Config] = {
+  private[statementHistory] def parseCmdOptions(args: Array[String]): Option[Config] = {
     val parser = new scopt.OptionParser[Config]("java -jar <jar_name>") {
       opt[Boolean]('m', "method") action { (x,c) =>
           c.copy(method = x)
@@ -36,8 +36,8 @@ object Main {
       opt[Unit]("forward") action { (_,c) =>
         c.copy(forward = true)
       } text("Perform the analysis only on the commits that follow the reference commit, exclusive")
-        c.copy(reverse = false)
       opt[Unit]("reverse") action { (_, c) =>
+        c.copy(reverse = true)
       } text("Perform the analysis only on the commits that preceed the referece commit, inclusive")
     }
 
