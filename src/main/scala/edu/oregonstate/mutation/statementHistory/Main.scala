@@ -30,14 +30,14 @@ object Main {
       opt[String]('c', "commit") action{ (x,c) =>
         c.copy(commit = x)
       } text("The commit to reference the line number to; default is HEAD")
-      opt[String]("out") action { (x,c) =>
+      opt[String]('f', "out") action { (x,c) =>
         c.copy(file = Some(x))
       } text("The output file")
-      opt[Unit]('f', "forward") action { (_,c) =>
+      opt[Unit]("forward") action { (_,c) =>
         c.copy(forward = true)
       } text("Perform the analysis only on the commits that follow the reference commit, exclusive")
-      opt[Unit]('r', "reverse") action { (_, c) =>
         c.copy(reverse = false)
+      opt[Unit]("reverse") action { (_, c) =>
       } text("Perform the analysis only on the commits that preceed the referece commit, inclusive")
     }
 
