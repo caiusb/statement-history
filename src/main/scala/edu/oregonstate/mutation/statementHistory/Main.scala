@@ -30,7 +30,7 @@ object Main {
       opt[String]('c', "commit") action{ (x,c) =>
         c.copy(commit = x)
       } text("The commit to reference the line number to; default is HEAD")
-      opt[String]('f', "output-file") action { (x,c) =>
+      opt[String]("out") action { (x,c) =>
         c.copy(file = Some(x))
       } text("The output file")
       opt[Unit]('f', "forward") action { (_,c) =>
