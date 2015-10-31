@@ -70,18 +70,16 @@ object Main {
     outputStream.write(result.getBytes)
   }
 
-  private[statementHistory] def getAnalysisOrder(config: Config): Order.Value = {
+  private[statementHistory] def getAnalysisOrder(config: Config): Order.Value =
     if (config.forward)
       Order.FORWARD
     else if (config.reverse)
       Order.REVERSE
     else
       Order.BOTH
-  }
 
-  private def disableLoggers() = {
+  private def disableLoggers() =
     Matcher.LOGGER.setLevel(Level.OFF)
-  }
 
   def main(args: Array[String]) = {
 
