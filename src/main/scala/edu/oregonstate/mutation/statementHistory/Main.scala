@@ -33,10 +33,10 @@ object Main {
       opt[String]('f', "output-file") action { (x,c) =>
         c.copy(file = Some(x))
       } text("The output file")
-      opt[Boolean]('f', "forward") action { (x, c) =>
+      opt[Unit]('f', "forward") action { (_,c) =>
         c.copy(forward = true)
       } text("Perform the analysis only on the commits that follow the reference commit, exclusive")
-      opt[Boolean]('r', "reverse") action { (x, c) =>
+      opt[Unit]('r', "reverse") action { (_, c) =>
         c.copy(reverse = false)
       } text("Perform the analysis only on the commits that preceed the referece commit, inclusive")
     }
