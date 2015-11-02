@@ -63,7 +63,7 @@ object Main {
 
     val result = mutants.toParArray.map(mutant => {
       mutant.getFileName + "," + mutant.getLineNumber + "," +
-        detector.findCommits(mutant.getFileName, mutant.getLineNumber, order = order).map(commit => commit + ",").
+        detector.findCommits(mutant.getFileName, mutant.getLineNumber, config.commit, order).map(commit => commit + ",").
           foldRight[String]("")((c, e) => c + e) + "\n"
     }).asParSeq.reduceRight((current, element) => current + element)
 
