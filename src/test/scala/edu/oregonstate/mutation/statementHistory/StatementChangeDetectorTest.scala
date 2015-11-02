@@ -159,7 +159,7 @@ class StatementChangeDetectorTest extends GitTest {
 
   it should "find commits after reference, where the file wasn't touched" in {
     val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
-    var second = add("B.java", "public class B{}")
+    val second = add("B.java", "public class B{}")
     val third = add("A.java", "public class A{\npublic void m(){\nint x=32;\n}\n}")
     val fourth = add("A.java", "public class A{\npublic void m(){\nint x=4;\n}\n}")
     val expected = Seq(ci(third.getName, "UPDATE"), ci(fourth.getName, "UPDATE"))
