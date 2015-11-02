@@ -2,6 +2,7 @@ package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
 
+import edu.oregonstate.mutation.statementHistory.Order._
 import fr.labri.gumtree.actions.model._
 import fr.labri.gumtree.gen.jdt.JdtTree
 import fr.labri.gumtree.matchers.MappingStore
@@ -17,13 +18,13 @@ class NodeChangeDetector(private val repo: File, private val finder: NodeFinder)
 
   def this(repo: String, finder: NodeFinder) = this(new File(repo), finder)
 
-  def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD", order: Order.Value = Order.BOTH): Seq[CommitInfo] = {
+  def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD", order: Value = BOTH): Seq[CommitInfo] = {
     val finder = new FileFinder(repo.getAbsolutePath)
     val fullPath = findFullPath(GitUtil.getCommit(git, commit), filePath)
     val before = finder.findAll(fullPath, commit)
     val after = finder.findAll(fullPath, "HEAD").filter(c => !before.contains(c)).+:(before.last)
 
-    val beforeChanges = if (order == Order.REVERSE || order == Order.BOTH) {
+    val beforeChanges = if (order == REVERSE || order == BOTH) {
       val lastBit = process(lineNo, fullPath, before.reverse, false)
 
       if (lastBit.getLine != -1)
@@ -33,7 +34,7 @@ class NodeChangeDetector(private val repo: File, private val finder: NodeFinder)
     } else
       Seq()
 
-    val afterChanges = if (order == Order.FORWARD || order == Order.BOTH)
+    val afterChanges = if (order == FORWARD || order == BOTH)
       process(lineNo, fullPath, after, true).getChangedCommits
     else
       Seq()
