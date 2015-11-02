@@ -156,4 +156,28 @@ class StatementChangeDetectorTest extends GitTest {
     commits should have size expected.size
     commits should equal (expected)
   }
+
+  it should "find commits after reference, where the file wasn't touched" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    var second = add("B.java", "public class B{}")
+    val third = add("A.java", "public class A{\npublic void m(){\nint x=32;\n}\n}")
+    val fourth = add("A.java", "public class A{\npublic void m(){\nint x=4;\n}\n}")
+    val expected = Seq(ci(third.getName, "UPDATE"), ci(fourth.getName, "UPDATE"))
+
+    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 3, second.getName, Order.FORWARD)
+    commits should have size expected.size
+    commits should equal (expected)
+  }
+
+  it should "find the commits before reference, when the file wasn't touched" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("B.java", "public class B{}")
+    val third = add("A.java", "public class A{\npublic void m(){\nint x=32;\n}\n}")
+    val fourth = add("A.java", "public class A{\npublic void m(){\nint x=4;\n}\n}")
+    val expected = Seq(ci(first.getName, "ADD"))
+
+    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 3, second.getName, Order.REVERSE)
+    commits should have size (expected.size)
+    commits should equal (expected)
+  }
 }
