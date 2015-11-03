@@ -22,5 +22,11 @@ trait NodeFinder {
     }
   }
 
+  def findAllNodesForFile(git: Git, commit: String, file: String): List[ASTNode] = {
+    val content = GitUtil.getFileContent(git, commit, file)
+    val ast = AST.getAST(content)
+    getMapOfNodes(ast).values.toList
+  }
+
   def getMapOfNodes(astRoot: ASTNode): Map[Int, ASTNode]
 }
