@@ -4,6 +4,8 @@ import java.io.{File, FileOutputStream, PrintStream}
 import java.util.logging.Level
 
 import fr.labri.gumtree.matchers.Matcher
+import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit}
+import org.eclipse.jgit.api.Git
 
 object Main {
 
@@ -54,7 +56,7 @@ object Main {
     val detector = new NodeChangeDetector(config.repo, finder)
     val statements = config.jsonFile match {
       case Some(x) => JSONDecoder.decode(x)
-      case None => Seq()
+      case None => getAllStatementsInRepo(config)
     }
 
     val outputStream = config.file match {
@@ -71,6 +73,15 @@ object Main {
     }).asParSeq.reduceRight((current, element) => current + element)
 
     outputStream.write(result.getBytes)
+  }
+
+  private[statementHistory] def getAllStatementsInRepo(config: Config): Seq[StatementInfo] = {
+    val git = Git.open(config.repo)
+    JavaFileFinder.findIn(git, config.commit)
+      .foldLeft[Seq[StatementInfo]](Seq())((list, file) => {
+      list ++ StatementFinder.findAllNodesForFile(git, config.commit, file)
+        .map(node => new StatementInfo(file, node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(node.getStartPosition), "")).toSeq
+    })
   }
 
   private[statementHistory] def getAnalysisOrder(config: Config): Order.Value =

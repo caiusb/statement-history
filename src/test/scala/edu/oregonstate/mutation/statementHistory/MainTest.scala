@@ -2,12 +2,13 @@ package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
 
+import edu.oregonstate.mutation.statementHistory.Main.Config
 import org.scalatest.{Matchers, FlatSpec}
 
 /**
  * Created by caius on 10/30/15.
  */
-class MainTest extends FlatSpec with Matchers {
+class MainTest extends GitTest {
 
   private def parse(opts: String): Main.Config =
     Main.parseCmdOptions(opts.split(" ")).get
@@ -43,5 +44,11 @@ class MainTest extends FlatSpec with Matchers {
 
   it should "correctly determine the order to be in reverse" in {
     Main.getAnalysisOrder(parse("-c c -j j -r r --reverse")) should equal (Order.REVERSE)
+  }
+
+  it should "find all the statements in the repo" in {
+    add("A.java", "public class A{public void m(){int x=33;}}")
+    add("B.java", "public class B{public void m(){int y=33;}}")
+    Main.getAllStatementsInRepo(new Config(repo = repo)) should have size 2
   }
 }
