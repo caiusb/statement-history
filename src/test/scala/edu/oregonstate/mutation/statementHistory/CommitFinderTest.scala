@@ -6,7 +6,7 @@ class CommitFinderTest extends GitTest {
   
   override def beforeEach = {
     super.beforeEach
-    fileFinder = new CommitFinder(repo.getAbsolutePath)
+    fileFinder = new CommitFinder(git)
   }
   
   it should "find the file" in {

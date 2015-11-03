@@ -13,11 +13,13 @@ import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
 trait GitTest extends FlatSpec with BeforeAndAfterEach with Matchers {
   
   var repo: File = _
+  var git: Git = _
   val author = new PersonIdent("Test Person", "test@example.com")
   
   override def beforeEach = {
     repo = initRepo
     repo should not be (null)
+    git = Git.open(repo)
   }
   
   override def afterEach {

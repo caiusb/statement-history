@@ -1,17 +1,19 @@
 package edu.oregonstate.mutation.statementHistory
 
+import org.eclipse.jgit.api.Git
+
 class StatementChangeDetectorTest extends GitTest {
 
   private def ci(a: String, b:String): CommitInfo = new CommitInfo(a, b)
-  private def nd(repo: String): NodeChangeDetector = nd(repo, StatementFinder)
-  private def nd(repo: String, finder: NodeFinder): NodeChangeDetector = new NodeChangeDetector(repo, StatementFinder)
+  private def nd(git: Git): NodeChangeDetector = nd(git, StatementFinder)
+  private def nd(git: Git, finder: NodeFinder): NodeChangeDetector = new NodeChangeDetector(git, StatementFinder)
 
   it should "find a statement change in two consecutive commits" in {
     val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
     val second = add("A.java", "public class A{\npublic void m(){\nint x=2;\n}\n}")
     val expected = Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"))
 
-    val detector = nd(repo.getAbsolutePath)
+    val detector = nd(git)
     val commits = detector.findCommits("A.java", 3)
     commits should have size 2
     commits should equal(expected)
@@ -22,7 +24,7 @@ class StatementChangeDetectorTest extends GitTest {
     val second = add("A.java", "public class A{\npublic void m(){\nint x=2;\n}\n}")
     val third = add("A.java", "public class A{\npublic void m(){\nint x=10;\n}\n}")
     val expected = Seq(ci(first.getName, "ADD"), ci(second.getName,"UPDATE"), ci(third.getName,"UPDATE"))
-    val detector = nd(repo.getAbsolutePath)
+    val detector = nd(git)
     val commits = detector.findCommits("A.java", 3)
     commits should have size 3
     commits should equal(expected)
@@ -34,7 +36,7 @@ class StatementChangeDetectorTest extends GitTest {
     val third = add("A.java", "public class A{\npublic void m(){\n//some comment\nint x=10;\n}\n}")
     val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"UPDATE"), ci(third.getName, "UPDATE"))
 
-    val detector = nd(repo getAbsolutePath)
+    val detector = nd(git)
     val commits = detector.findCommits("A.java", 4)
     commits should have size 3
     commits should equal(expected)
@@ -45,7 +47,7 @@ class StatementChangeDetectorTest extends GitTest {
     val second = add("A.java", "public class A{\npublic void m(){\nSystem.out.println(\"\");\nint x=3;\n}\n}")
     val expected = Seq(ci(first.getName,"ADD"))
 
-    val commits = nd(repo getAbsolutePath).findCommits("A.java", 4)
+    val commits = nd(git).findCommits("A.java", 4)
     commits should have size expected.size
     commits should equal(expected)
   }
@@ -55,7 +57,7 @@ class StatementChangeDetectorTest extends GitTest {
     val second = add("A.java", "public class A{\npublic void m(){\nint x=3;}}")
     val expected = Seq(ci(second.getName,"ADD"))
 
-    val commits = nd(repo getAbsolutePath).findCommits("A.java", 3)
+    val commits = nd(git).findCommits("A.java", 3)
     commits should have size 1
     commits should equal(expected)
   }
@@ -65,7 +67,7 @@ class StatementChangeDetectorTest extends GitTest {
     val second = add("src/A.java", "public class A{\npublic void m(){\nint x=20;}\n}")
     val expected = Seq(ci(first.getName,"ADD"), ci(second.getName, "UPDATE"))
 
-    val commits = nd(repo getAbsolutePath).findCommits("A.java", 3)
+    val commits = nd(git).findCommits("A.java", 3)
     commits should have size 2
     commits should equal(expected)
   }
@@ -77,7 +79,7 @@ class StatementChangeDetectorTest extends GitTest {
     val fourth = add("src/A.java", "public class A{\npublic void m(){\nint y=22;\n}\n}")
     val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"UPDATE"), ci(third.getName,"UPDATE"), ci(fourth.getName,"UPDATE"))
 
-    val commits = nd(repo getAbsolutePath).findCommits("A.java", 3)
+    val commits = nd(git).findCommits("A.java", 3)
     commits should have size 4
     commits should equal(expected)
   }
@@ -88,7 +90,7 @@ class StatementChangeDetectorTest extends GitTest {
     val third = add("src/A.java", "public class A{\npublic void m(){\nint x=22;\n}\n}")
     val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"UPDATE"), ci(third.getName,"UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 4, second.getName)
+    val commits = nd(git).findCommits("A.java", 4, second.getName)
     commits should have size 3
     commits should equal(expected)
   }
@@ -98,7 +100,7 @@ class StatementChangeDetectorTest extends GitTest {
     val second = add("src/A.java", "public class A{\npublic void m(){\nint y=293;\nint x=34;\n}\n}")
     val expected = Seq(ci(first.getName,"ADD"), ci(second.getName,"UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 4)
+    val commits = nd(git).findCommits("A.java", 4)
     commits should have size 2
     commits should equal(expected)
   }
@@ -109,7 +111,7 @@ class StatementChangeDetectorTest extends GitTest {
     val third = add("A.java", "public class A{\npublic void m(){\nSystem.out.println(\"\");\nint x=4;\n}\n}")
     val expected = Seq(ci(first.getName, "ADD"), ci(third.getName, "UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 4)
+    val commits = nd(git).findCommits("A.java", 4)
     commits should have size 2
     commits should equal (expected)
   }
@@ -119,7 +121,7 @@ class StatementChangeDetectorTest extends GitTest {
     val second = add("A.java", "public class A{\npublic void m(){\nif(true){\nint x=343;}\n}\n}")
     val expected = Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath).findCommits("A.java",4)
+    val commits = nd(git).findCommits("A.java",4)
     commits should have size expected.size
     commits should equal (expected)
   }
@@ -130,7 +132,7 @@ class StatementChangeDetectorTest extends GitTest {
     val third = add("A.java", "public class A{\npublic void m(){\nint x=4;\n}\n}")
     val expected=Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"), ci(third.getName, "UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 3, second.getName)
+    val commits = nd(git).findCommits("A.java", 3, second.getName)
     commits should have size expected.size
     commits should equal (expected)
   }
@@ -141,7 +143,7 @@ class StatementChangeDetectorTest extends GitTest {
     val third = add("A.java", "public class A{\npublic void m(){\nint x=4;\n}\n}")
     val expected=Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 3, second.getName, Order.REVERSE)
+    val commits = nd(git).findCommits("A.java", 3, second.getName, Order.REVERSE)
     commits should have size expected.size
     commits should equal (expected)
   }
@@ -152,7 +154,7 @@ class StatementChangeDetectorTest extends GitTest {
     val third = add("A.java", "public class A{\npublic void m(){\nint x=4;\n}\n}")
     val expected=Seq(ci(third.getName, "UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 3, second.getName, Order.FORWARD)
+    val commits = nd(git).findCommits("A.java", 3, second.getName, Order.FORWARD)
     commits should have size expected.size
     commits should equal (expected)
   }
@@ -164,7 +166,7 @@ class StatementChangeDetectorTest extends GitTest {
     val fourth = add("A.java", "public class A{\npublic void m(){\nint x=4;\n}\n}")
     val expected = Seq(ci(third.getName, "UPDATE"), ci(fourth.getName, "UPDATE"))
 
-    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 3, second.getName, Order.FORWARD)
+    val commits = nd(git).findCommits("A.java", 3, second.getName, Order.FORWARD)
     commits should have size expected.size
     commits should equal (expected)
   }
@@ -176,7 +178,7 @@ class StatementChangeDetectorTest extends GitTest {
     val fourth = add("A.java", "public class A{\npublic void m(){\nint x=4;\n}\n}")
     val expected = Seq(ci(first.getName, "ADD"))
 
-    val commits = nd(repo.getAbsolutePath).findCommits("A.java", 3, second.getName, Order.REVERSE)
+    val commits = nd(git).findCommits("A.java", 3, second.getName, Order.REVERSE)
     commits should have size (expected.size)
     commits should equal (expected)
   }

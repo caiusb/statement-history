@@ -10,9 +10,7 @@ import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 import org.gitective.core.CommitUtils
 
-class CommitFinder(repo: String) {
-
-	val git = Git.open(new File(repo))
+class CommitFinder(private val git: Git) {
 
   def createWalkWithFilter(path: String, sha: String) = {
     val walk = new RevWalk(git.getRepository)

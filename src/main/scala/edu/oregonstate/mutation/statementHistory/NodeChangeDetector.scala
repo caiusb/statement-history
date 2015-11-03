@@ -12,14 +12,10 @@ import org.eclipse.jgit.revwalk.RevCommit
 
 import scala.collection.JavaConversions
 
-class NodeChangeDetector(private val repo: File, private val finder: NodeFinder) {
-
-  private val git = Git.open(repo)
-
-  def this(repo: String, finder: NodeFinder) = this(new File(repo), finder)
+class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
 
   def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD", order: Value = BOTH): Seq[CommitInfo] = {
-    val finder = new CommitFinder(repo.getAbsolutePath)
+    val finder = new CommitFinder(git)
     val fullPath = findFullPath(GitUtil.getCommit(git, commit), filePath)
     val before = finder.findAllCommits(fullPath, commit)
     val after = finder.findAllCommits(fullPath, "HEAD").filter(c => !before.contains(c)).+:(before.last)
