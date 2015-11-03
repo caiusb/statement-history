@@ -4,6 +4,7 @@ import java.io.{File, PrintWriter}
 import java.nio.file.Paths
 
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.dircache.DirCacheEntry
 import org.eclipse.jgit.lib.{Constants, PersonIdent}
 import org.eclipse.jgit.revwalk.RevCommit
 import org.scalatest.{BeforeAndAfterEach, FlatSpec, Matchers}
@@ -53,12 +54,31 @@ trait GitTest extends FlatSpec with BeforeAndAfterEach with Matchers {
   
   def add(filename: String, content: String, message: String): RevCommit = {
     val git = Git.open(repo)
-    createFile(filename, content)
-    val cache = git.add.addFilepattern(filename).call
-    val entry = cache.getEntry(filename)
+    val entry: DirCacheEntry = addFileToIndex(filename, content, git)
     entry should not be (null)
+    return commit(message, git)
+  }
+
+  private def commit(message: String, git: Git): RevCommit = {
     val result = git.commit.setMessage(message).setAuthor(author).setCommitter(author).call
     result should not be (null)
     return result
+  }
+
+  private def addFileToIndex(filename: String, content: String, git: Git): DirCacheEntry = {
+    createFile(filename, content)
+    val cache = git.add.addFilepattern(filename).call
+    val entry = cache.getEntry(filename)
+    entry
+  }
+
+  def add(fileNames: Seq[String], contents: Seq[String]): RevCommit =
+    add(fileNames, contents, "")
+
+  def add(fileNames: Seq[String], content: Seq[String], message: String): RevCommit = {
+    val git = Git.open(repo)
+    for((file,content) <- fileNames zip content)
+      addFileToIndex(file, content, git)
+    commit(message, git)
   }
 }
