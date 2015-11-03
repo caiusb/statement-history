@@ -49,6 +49,6 @@ class MainTest extends GitTest {
   it should "find all the statements in the repo" in {
     add("A.java", "public class A{public void m(){int x=33;}}")
     add("B.java", "public class B{public void m(){int y=33;}}")
-    Main.getAllStatementsInRepo(new Config(repo = repo)) should have size 2
+    Main.getAllNodesInRepo(new Config(repo = repo)) should have size 2
   }
 }

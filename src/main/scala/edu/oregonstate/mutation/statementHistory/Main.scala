@@ -53,10 +53,11 @@ object Main {
       MethodFinder
     else
       StatementFinder
+
     val detector = new NodeChangeDetector(config.repo, finder)
     val statements = config.jsonFile match {
       case Some(x) => JSONDecoder.decode(x)
-      case None => getAllStatementsInRepo(config)
+      case None => getAllNodesInRepo(finder, config)
     }
 
     val outputStream = config.file match {
@@ -75,11 +76,11 @@ object Main {
     outputStream.write(result.getBytes)
   }
 
-  private[statementHistory] def getAllStatementsInRepo(config: Config): Seq[StatementInfo] = {
+  private[statementHistory] def getAllNodesInRepo(finder: NodeFinder = StatementFinder, config: Config): Seq[StatementInfo] = {
     val git = Git.open(config.repo)
     JavaFileFinder.findIn(git, config.commit)
       .foldLeft[Seq[StatementInfo]](Seq())((list, file) => {
-      list ++ StatementFinder.findAllNodesForFile(git, config.commit, file)
+      list ++ finder.findAllNodesForFile(git, config.commit, file)
         .map(node => new StatementInfo(file, node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(node.getStartPosition), "")).toSeq
     })
   }
