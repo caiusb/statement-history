@@ -52,7 +52,7 @@ object Main {
     else
       StatementFinder
     val detector = new NodeChangeDetector(config.repo, finder)
-    val mutants = config.jsonFile match {
+    val statements = config.jsonFile match {
       case Some(x) => JSONDecoder.decode(x)
       case None => Seq()
     }
@@ -64,7 +64,7 @@ object Main {
 
     val order = getAnalysisOrder(config)
 
-    val result = mutants.toParArray.map(mutant => {
+    val result = statements.toParArray.map(mutant => {
       mutant.getFileName + "," + mutant.getLineNumber + "," +
         detector.findCommits(mutant.getFileName, mutant.getLineNumber, config.commit, order).map(commit => commit + ",").
           foldRight[String]("")((c, e) => c + e) + "\n"
