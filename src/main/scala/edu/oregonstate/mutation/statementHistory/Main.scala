@@ -64,9 +64,9 @@ object Main {
 
     val order = getAnalysisOrder(config)
 
-    val result = statements.toParArray.map(mutant => {
-      mutant.getFileName + "," + mutant.getLineNumber + "," +
-        detector.findCommits(mutant.getFileName, mutant.getLineNumber, config.commit, order).map(commit => commit + ",").
+    val result = statements.toParArray.map(statement => {
+      statement.getFileName + "," + statement.getLineNumber + "," +
+        detector.findCommits(statement.getFileName, statement.getLineNumber, config.commit, order).map(commit => commit + ",").
           foldRight[String]("")((c, e) => c + e) + "\n"
     }).asParSeq.reduceRight((current, element) => current + element)
 
