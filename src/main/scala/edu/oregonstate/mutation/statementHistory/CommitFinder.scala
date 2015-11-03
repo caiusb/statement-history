@@ -10,7 +10,7 @@ import org.eclipse.jgit.revwalk.{RevCommit, RevWalk}
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 import org.gitective.core.CommitUtils
 
-class FileFinder(repo: String) {
+class CommitFinder(repo: String) {
 
 	val git = Git.open(new File(repo))
 
@@ -25,19 +25,19 @@ class FileFinder(repo: String) {
     walk
   }
 
-	def findFirst(path: String, sha: String): RevCommit = {
+	def findFirstCommit(path: String, sha: String): RevCommit = {
 			val walk = createWalkWithFilter(path, sha)
 			val nextCommit = walk.next
 			walk.close
 			nextCommit
 	}
 
-  def findAll(path: String, sha: String): Seq[String] = {
+  def findAllCommits(path: String, sha: String): Seq[String] = {
     import GitUtil._
 
     import scala.collection.JavaConversions._
 
-    val first = findFirst(path, sha)
+    val first = findFirstCommit(path, sha)
     val walk = new RevWalk(git.getRepository)
     walk.sort(NONE)
     walk.sort(COMMIT_TIME_DESC, true)

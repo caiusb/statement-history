@@ -8,12 +8,12 @@ import scala.io.Source
 
 object JSONDecoder {
 
-  def decode(file: File) : Seq[MutantInfo] = {
+  def decode(file: File) : Seq[StatementInfo] = {
     decode(Source.fromFile(file).mkString)
   }
 
-  def decode(json: String) : Seq[MutantInfo] = {
-    def decodeLine(line: String): MutantInfo = {
+  def decode(json: String) : Seq[StatementInfo] = {
+    def decodeLine(line: String): StatementInfo = {
       var parsed = Json.parse(line)
       var file = (parsed \ "mutant" \ "filename").as[String]
       var rawLineNo = parsed \ "mutant" \ "line"
@@ -22,7 +22,7 @@ object JSONDecoder {
         case _ => rawLineNo.as[String].toInt
       }
       var className = (parsed \ "mutant" \ "id" \ "location" \ "class").as[String]
-      return new MutantInfo(file, lineNo, className)
+      return new StatementInfo(file, lineNo, className)
     }
     json.split("\n").map(line => {
       decodeLine(line)

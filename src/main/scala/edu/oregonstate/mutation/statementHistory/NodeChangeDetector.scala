@@ -19,10 +19,10 @@ class NodeChangeDetector(private val repo: File, private val finder: NodeFinder)
   def this(repo: String, finder: NodeFinder) = this(new File(repo), finder)
 
   def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD", order: Value = BOTH): Seq[CommitInfo] = {
-    val finder = new FileFinder(repo.getAbsolutePath)
+    val finder = new CommitFinder(repo.getAbsolutePath)
     val fullPath = findFullPath(GitUtil.getCommit(git, commit), filePath)
-    val before = finder.findAll(fullPath, commit)
-    val after = finder.findAll(fullPath, "HEAD").filter(c => !before.contains(c)).+:(before.last)
+    val before = finder.findAllCommits(fullPath, commit)
+    val after = finder.findAllCommits(fullPath, "HEAD").filter(c => !before.contains(c)).+:(before.last)
 
     val beforeChanges = if (order == REVERSE || order == BOTH) {
       val lastBit = process(lineNo, fullPath, before.reverse, false)
