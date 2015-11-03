@@ -7,23 +7,25 @@ import org.eclipse.jdt.core.dom.{ASTNode, ASTVisitor, CompilationUnit, MethodDec
  */
 object MethodFinder extends NodeFinder {
 
-  private class MethodVisitor(private val line: Integer) extends ASTVisitor {
+  private class MethodVisitor extends ASTVisitor {
 
-    var method: MethodDeclaration = _
+    val methods = scala.collection.mutable.Map[Int, MethodDeclaration]()
 
     override def visit(method: MethodDeclaration): Boolean = {
       var root = method.getRoot.asInstanceOf[CompilationUnit]
       val start = root.getLineNumber(method.getStartPosition)
       val end = root.getLineNumber(method.getStartPosition + method.getLength)
-      if (start <= line && line <= end )
-        this.method=method
-
+      (start to end).foreach(line => methods(line) = method)
       false
     }
   }
   override def findNode(line: Int, root: ASTNode): ASTNode = {
-    val visitor = new MethodVisitor(line)
-    root.accept(visitor)
-    visitor.method
+    getMapOfNodes(root)(line)
+  }
+
+  override def getMapOfNodes(astRoot: ASTNode): Map[Int, ASTNode] = {
+    val visitor = new MethodVisitor()
+    astRoot.accept(visitor)
+    Map() ++ visitor.methods
   }
 }
