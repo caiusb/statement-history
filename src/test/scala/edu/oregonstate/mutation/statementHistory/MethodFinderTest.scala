@@ -16,4 +16,13 @@ class MethodFinderTest extends FlatSpec with Matchers {
     method.asInstanceOf[MethodDeclaration].getName.getIdentifier should equal ("m")
   }
 
+  it should "find a method spanning multiple lines" in {
+    val content = "public class A{\npublic void m(){\nint x=22;\nint y=33;\n\n}}"
+    val root = AST.getAST(content)
+    MethodFinder.findNode(2, root).asInstanceOf[MethodDeclaration].getName.getIdentifier should equal ("m")
+    MethodFinder.findNode(3, root).asInstanceOf[MethodDeclaration].getName.getIdentifier should equal ("m")
+    MethodFinder.findNode(4, root).asInstanceOf[MethodDeclaration].getName.getIdentifier should equal ("m")
+    MethodFinder.findNode(5, root).asInstanceOf[MethodDeclaration].getName.getIdentifier should equal ("m")
+  }
+
 }
