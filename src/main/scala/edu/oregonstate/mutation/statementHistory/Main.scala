@@ -9,7 +9,7 @@ object Main {
 
   private[statementHistory] case class Config(method: Boolean = false,
                         repo: File = new File("."),
-                        jsonFile: File = new File("."),
+                        jsonFile: Option[File] = None,
                         commit: String = "HEAD",
                         file:Option[String] = None,
                         forward: Boolean = false,
@@ -24,8 +24,8 @@ object Main {
       opt[String]('r', "repo") required() action { (x,c) =>
         c.copy(repo=new File(x))
       } text("The location of the repository")
-      opt[String]('j', "json-file") required() action { (x,c) =>
-        c.copy(jsonFile = new File(x))
+      opt[String]('j', "json-file") action { (x,c) =>
+        c.copy(jsonFile = Some(new File(x)))
       } text("The json file with the mutants")
       opt[String]('c', "commit") action{ (x,c) =>
         c.copy(commit = x)
@@ -52,7 +52,10 @@ object Main {
     else
       StatementFinder
     val detector = new NodeChangeDetector(config.repo, finder)
-    val mutants = JSONDecoder.decode(config.jsonFile)
+    val mutants = config.jsonFile match {
+      case Some(x) => JSONDecoder.decode(x)
+      case None => Seq()
+    }
 
     val outputStream = config.file match {
       case Some(x) => new PrintStream(new FileOutputStream(new File(x)))
