@@ -149,4 +149,5 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
     walk.setFilter(PathSuffixFilter.create(path))
     walk.next()
     walk.getPathString
+  }
 }
