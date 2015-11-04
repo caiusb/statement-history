@@ -182,4 +182,13 @@ class StatementChangeDetectorTest extends GitTest {
     commits should have size (expected.size)
     commits should equal (expected)
   }
+
+  it should "not throw an NPE when the file wasn't modified in the reference commit" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("B.java", "public class B{}")
+    git.rm().addFilepattern("A.java").call()
+    val third = git.commit().setMessage("smth").call()
+
+    val commits = nd(git).findCommits("A.java", 3, third.getName, Order.BOTH)
+  }
 }
