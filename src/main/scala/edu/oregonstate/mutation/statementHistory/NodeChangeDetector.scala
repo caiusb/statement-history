@@ -9,6 +9,8 @@ import fr.labri.gumtree.matchers.MappingStore
 import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit}
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
+import org.eclipse.jgit.treewalk.TreeWalk
+import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 
 import scala.collection.JavaConversions
 
@@ -140,9 +142,11 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
   }
 
   private def findFullPath(commit: RevCommit, path: String): String = {
-    val diffs = GitUtil.getDiffs(git, commit)
-    diffs.filter(diff => {
-      diff.getNewPath.endsWith(path)
-    })(0).getNewPath
-  }
+    val tree = commit.getTree
+    val walk = new TreeWalk(git.getRepository)
+    walk.addTree(tree)
+    walk.setRecursive(true)
+    walk.setFilter(PathSuffixFilter.create(path))
+    walk.next()
+    walk.getPathString
 }
