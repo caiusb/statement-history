@@ -191,4 +191,14 @@ class StatementChangeDetectorTest extends GitTest {
 
     val commits = nd(git).findCommits("A.java", 3, third.getName, Order.BOTH)
   }
+
+  ignore should "track a change over a rename" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("B.java", "public class A{\npublic void m(){\nint x=33;\n}\n}")
+    val expected = Seq(ci(first.getName, "ADD"), ci(second.getName, "UPDATE"))
+
+    val commits = nd(git).findCommits("A.java", 3, second.getName, Order.BOTH)
+    commits should have size (expected.size)
+    commits should equal (expected)
+  }
 }
