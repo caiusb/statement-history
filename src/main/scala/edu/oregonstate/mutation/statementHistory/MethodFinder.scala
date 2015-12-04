@@ -19,9 +19,6 @@ object MethodFinder extends NodeFinder {
       false
     }
   }
-  override def findNode(line: Int, root: ASTNode): ASTNode = {
-    getMapOfNodes(root)(line)
-  }
 
   override def getMapOfNodes(astRoot: ASTNode): Map[Int, ASTNode] = {
     val visitor = new MethodVisitor()
