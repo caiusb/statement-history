@@ -59,15 +59,15 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
 
     val oldTree = ASTDiff.getTree(GitUtil.getFileContent(git, oldCommit, path))
     val newTree = ASTDiff.getTree(GitUtil.getFileContent(git, newCommit, path))
-    val statement = if (propagateForward)
+    val node = if (propagateForward)
     finder.findNode(line, oldTree.asInstanceOf[JdtTree].getContainedNode)
     else
     finder.findNode(line, newTree.asInstanceOf[JdtTree].getContainedNode)
     val (actions, matchings) = ASTDiff.getActions(oldTree, newTree)
 
-    val nextLine = getNextLine(statement, matchings, propagateForward)
+    val nextLine = getNextLine(node, matchings, propagateForward)
     var matchingActions = processActions(actions, matchings, propagateForward)
-    val statementActions = getActionsTouchingNode(statement, matchingActions)
+    val statementActions = getActionsTouchingNode(node, matchingActions)
     statementActions.foreach(action => {
       action match {
         case _: Update => return Some(new ChangeInfo(nextLine, Seq(new CommitInfo(newCommit, "UPDATE"))))
