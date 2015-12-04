@@ -25,4 +25,10 @@ class MethodFinderTest extends FlatSpec with Matchers {
     MethodFinder.findNode(5, root).asInstanceOf[MethodDeclaration].getName.getIdentifier should equal ("m")
   }
 
+  it should "fail gracefully if a method is not found" in {
+    val content = "public class A{\n\npublic void m(){}}"
+    var root = AST.getAST(content)
+    MethodFinder.findNode(1, root) should be (null)
+  }
+
 }
