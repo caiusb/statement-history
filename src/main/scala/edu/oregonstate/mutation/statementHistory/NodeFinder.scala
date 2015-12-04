@@ -16,7 +16,7 @@ trait NodeFinder {
 
   def findNode(lineNumber: Int, astRoot: ASTNode): ASTNode = {
     val statementMap: Map[Int, ASTNode] = getMapOfNodes(astRoot)
-    statementMap.get(lineNumber - 1) match {
+    statementMap.get(lineNumber) match {
       case Some(x) => return x
       case None => return null
     }

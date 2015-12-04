@@ -44,7 +44,7 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   def assertStatement(stmtMap: Map[Int, Statement], expected: Int): Unit = {
     stmtMap should have size expected
-    stmtMap(2) should not be null
+    stmtMap(3) should not be null
   }
 
   it should "find a variable declaration" in

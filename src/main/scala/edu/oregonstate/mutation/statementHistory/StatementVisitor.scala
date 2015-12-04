@@ -12,7 +12,7 @@ class StatementVisitor() extends ASTVisitor {
   
   def visitStatement(node: Statement):Boolean = {
     val startPosition = node.getStartPosition
-    val line = node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(startPosition) - 1
+    val line = node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(startPosition)
     statementMap(line) = node
     return false
   }
