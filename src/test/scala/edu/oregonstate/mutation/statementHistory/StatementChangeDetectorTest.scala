@@ -2,11 +2,7 @@ package edu.oregonstate.mutation.statementHistory
 
 import org.eclipse.jgit.api.Git
 
-class StatementChangeDetectorTest extends GitTest {
-
-  private def ci(a: String, b:String): CommitInfo = new CommitInfo(a, b)
-  private def nd(git: Git): NodeChangeDetector = nd(git, StatementFinder)
-  private def nd(git: Git, finder: NodeFinder): NodeChangeDetector = new NodeChangeDetector(git, finder)
+class StatementChangeDetectorTest extends GitTest with NodeChangeDetectorTest {
 
   it should "find a statement change in two consecutive commits" in {
     val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
