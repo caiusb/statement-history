@@ -1,7 +1,5 @@
 package edu.oregonstate.mutation.statementHistory
 
-import java.io.File
-
 import edu.oregonstate.mutation.statementHistory.Order._
 import fr.labri.gumtree.actions.model._
 import fr.labri.gumtree.gen.jdt.JdtTree

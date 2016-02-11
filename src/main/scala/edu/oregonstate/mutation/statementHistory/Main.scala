@@ -4,7 +4,7 @@ import java.io.{File, FileOutputStream, PrintStream}
 import java.util.logging.Level
 
 import fr.labri.gumtree.matchers.Matcher
-import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit}
+import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jgit.api.Git
 
 object Main {
