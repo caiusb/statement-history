@@ -8,4 +8,6 @@ class StatementInfo(private var fileName: String, private var lineNumber: Int, p
   def getFileName:String = fileName
   def getLineNumber:Int = lineNumber
   def getClassName:String = className
+
+  def printInfo: String = getFileName + "," + getLineNumber + ","
 }
