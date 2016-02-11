@@ -70,7 +70,7 @@ class StatementVisitor() extends ASTVisitor {
     visitStatement(node)
 
   override def visit(node: TryStatement): Boolean =
-    visitStatement(node)
+    !visitStatement(node)
 
   override def visit(node: ThrowStatement): Boolean =
     visitStatement(node)
