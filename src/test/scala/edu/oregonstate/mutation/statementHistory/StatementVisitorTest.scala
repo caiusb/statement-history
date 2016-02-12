@@ -97,4 +97,9 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   it should "find a while statement" in
     checkStatement("while(true){;}")
+
+  it should "find a statement in a try block" in {
+    val node = checkCU("public class A{\npublic void m() { try{\nint x=3;\n}catch(Exception e){}}}", 2)
+    node shouldBe an [VariableDeclarationStatement]
+  }
 }
