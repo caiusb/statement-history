@@ -1,6 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.eclipse.jdt.core.dom.ASTNode
+import org.eclipse.jdt.core.dom.{Block, DoStatement, VariableDeclarationStatement, ASTNode}
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
 
@@ -37,6 +37,12 @@ class StatementInfoTest extends GitTest {
   it should "have the correct info for an enhanced for block" in {
     val node = find(add(FILE_NAME, makeClass("for(String x:xes)")))
     new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,for(4:5),")
+  }
+
+  it should "have the correct info for a do-while block" in {
+    val commit = add(FILE_NAME, "public class A{\npublic void m(){\ndo {\nint x=3;\n}while(true);\n}\n}")
+    val node = BlockFinder.findNode(Git.open(repo), commit.getName, FILE_NAME, 4)
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",3,do(3:5),")
   }
 
   it should "have the correct info for a try block" in {
