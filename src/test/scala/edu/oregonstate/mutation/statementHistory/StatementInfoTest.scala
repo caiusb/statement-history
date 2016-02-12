@@ -1,6 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.eclipse.jdt.core.dom.{Block, DoStatement, VariableDeclarationStatement, ASTNode}
+import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
 
