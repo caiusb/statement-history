@@ -1,7 +1,7 @@
 package edu.oregonstate.mutation.statementHistory
 
 import edu.oregonstate.mutation.statementHistory.AST._
-import org.eclipse.jdt.core.dom.Statement
+import org.eclipse.jdt.core.dom.{ASTNode, Statement, VariableDeclarationStatement}
 import org.scalatest._
 
 class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
@@ -24,27 +24,28 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
     stmtMap
   }
 
-  private def checkCU(stmt: String, expected: Int): Unit = {
+  private def checkCU(stmt: String, expected: Int): ASTNode = {
     val visitor = new StatementVisitor
     getAST(stmt).accept(visitor)
     assertStatement(visitor.getStatementMap, expected)
   }
 
-  private def checkCU(stmt: String): Unit =
+  private def checkCU(stmt: String): ASTNode =
     checkCU(stmt, 1)
 
-  def checkStatement(stmt: String): Unit =
+  def checkStatement(stmt: String): ASTNode =
     checkStatement(stmt, 1)
 
-  def checkStatement(stmt: String, expected: Int): Unit =
+  def checkStatement(stmt: String, expected: Int): ASTNode =
     assertStatement(getStatementMap(stmt), expected)
 
-  def assertStatement(stmtMap: Map[Int, Statement]): Unit =
+  def assertStatement(stmtMap: Map[Int, Statement]): ASTNode =
     assertStatement(stmtMap, 1)
 
-  def assertStatement(stmtMap: Map[Int, Statement], expected: Int): Unit = {
+  def assertStatement(stmtMap: Map[Int, Statement], expected: Int): ASTNode = {
     stmtMap should have size expected
     stmtMap(3) should not be null
+    stmtMap(3)
   }
 
   it should "find a variable declaration" in
