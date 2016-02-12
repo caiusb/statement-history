@@ -10,6 +10,7 @@ import org.eclipse.jgit.api.Git
 object Main {
 
   private[statementHistory] case class Config(method: Boolean = false,
+                        block: Boolean = false,
                         repo: File = new File("."),
                         jsonFile: Option[File] = None,
                         commit: String = "HEAD",
@@ -23,6 +24,9 @@ object Main {
       opt[Boolean]('m', "method") action { (x,c) =>
           c.copy(method = x)
         } text ("track methods; default is false, it tracks statements")
+      opt[Boolean]('b', "block") action { (x,c) =>
+        c.copy(block = x)
+        } text ("track blocks; default is false, it tracks statements")
       opt[String]('r', "repo") required() action { (x,c) =>
         c.copy(repo=new File(x))
       } text("The location of the repository")
@@ -51,6 +55,8 @@ object Main {
 
     val finder = if (config.method)
       MethodFinder
+    else  if (config.block)
+      BlockFinder
     else
       StatementFinder
 
