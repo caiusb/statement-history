@@ -26,6 +26,7 @@ class StatementInfo(private var fileName: String, private var lineNumber: Int, p
         case _: MethodDeclaration => "method("
         case _: TryStatement => "try("
         case _: CatchClause => "catch("
+        case _: Initializer => "static("
         case _ => "other("
       }
         t + root.getLineNumber(b.getStartPosition) + ":" + root.getLineNumber(b.getStartPosition + b.getLength) + "),"

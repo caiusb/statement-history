@@ -62,4 +62,10 @@ class StatementInfoTest extends GitTest {
     new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",2,method(2:3),")
   }
 
+  it should "have the correct info for a static block" in {
+    val commit = add(FILE_NAME, "public class A{\n{int x=3;\n}}")
+    val node = BlockFinder.findNode(Git.open(repo), commit.getName, FILE_NAME, 2)
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",2,static(2:3),")
+  }
+
 }
