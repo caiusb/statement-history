@@ -71,7 +71,7 @@ object Main {
       statement.printInfo +
         detector.findCommits(statement.getFileName, statement.getLineNumber, config.commit, order).map(commit => commit + ",").
           foldRight[String]("")((c, e) => c + e) + "\n"
-    }).asParSeq.reduceRight((current, element) => current + element)
+    }).reduceRight((current, element) => current + element)
 
     outputStream.write(result.getBytes)
   }

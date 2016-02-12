@@ -1,5 +1,7 @@
 import sbt._
 
+scalaVersion := "2.11.7"
+
 EclipseKeys.withSource := true
 
 addCommandAlias("idea", "update-classifiers; update-sbt-classifiers; gen-idea sbt-classifiers")
