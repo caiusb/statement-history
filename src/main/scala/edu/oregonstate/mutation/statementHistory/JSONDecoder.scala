@@ -2,6 +2,7 @@ package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
 
+import org.eclipse.jgit.api.Git
 import play.api.libs.json.Json
 
 import scala.io.Source
@@ -29,4 +30,9 @@ object JSONDecoder {
     }).toSeq
   }
 
+  def decode(json: String, git: Git, commit: String, finder: NodeFinder) : Seq[StatementInfo] = {
+    val statements = decode(json)
+    statements.foreach(s => s.computeOtherInfo(finder.findNode(git, commit, s.getFileName, s.getLineNumber)))
+    return statements
+  }
 }

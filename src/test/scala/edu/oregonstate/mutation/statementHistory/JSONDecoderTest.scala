@@ -2,6 +2,7 @@ package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
 
+import org.eclipse.jgit.api.Git
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.io.Source
@@ -9,7 +10,7 @@ import scala.io.Source
 /**
  * Created by caius on 9/25/15.
  */
-class JSONDecoderTest extends FlatSpec with Matchers {
+class JSONDecoderTest extends GitTest {
 
   it should "decode one line" in {
     var resource = getClass.getResource("/oneline.json")
@@ -37,5 +38,14 @@ class JSONDecoderTest extends FlatSpec with Matchers {
     var resource = getClass.getResource("/trickyline.json")
     var result = JSONDecoder.decode(new File(resource.getFile))
     result should have size 1
+  }
+
+  it should "decode with a repo" in {
+    val commit = add("A.java", "public class A{\npublic void m(){\nint x=3;}}")
+    var resource = getClass.getResource("/repo.json")
+    val content = Source.fromFile(resource.getFile).mkString
+    val statements = JSONDecoder.decode(content, Git.open(repo), commit.getName, BlockFinder)
+    statements should have size 1
+    statements(0).printInfo should equal ("A.java,3,method(2:3),")
   }
 }
