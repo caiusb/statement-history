@@ -87,7 +87,7 @@ object Main {
     JavaFileFinder.findIn(git, config.commit)
       .foldLeft[Seq[StatementInfo]](Seq())((list, file) => {
       list ++ finder.findAllNodesForFile(git, config.commit, file)
-        .map(node => new StatementInfo(file, node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(node.getStartPosition), "")).toSeq
+        .map(node => new StatementInfo(file, node)).toSeq
     })
   }
 
