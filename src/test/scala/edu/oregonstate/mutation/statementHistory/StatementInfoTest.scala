@@ -68,4 +68,10 @@ class StatementInfoTest extends GitTest {
     new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",2,static(2:3),")
   }
 
+  it should "have the correct info for a method" in {
+    val commit = add(FILE_NAME, "public class A{\npublic void m(){\nint x=3;\n}}")
+    val node = MethodFinder.findNode(Git.open(repo), commit.getName, FILE_NAME, 3)
+    new StatementInfo(FILE_NAME, node, 3).printInfo should equal (FILE_NAME + ",3,m,")
+  }
+
 }
