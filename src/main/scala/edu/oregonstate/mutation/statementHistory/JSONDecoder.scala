@@ -30,9 +30,15 @@ object JSONDecoder {
     }).toSeq
   }
 
+  def decode(file: File, git: Git, commit: String, finder: NodeFinder): Seq[StatementInfo] =
+    decode(Source.fromFile(file).mkString, git, commit, finder)
+
   def decode(json: String, git: Git, commit: String, finder: NodeFinder) : Seq[StatementInfo] = {
     val statements = decode(json)
-    statements.foreach(s => s.computeOtherInfo(finder.findNode(git, commit, s.getFileName, s.getLineNumber)))
+    statements.foreach(s => {
+      val node = finder.findNode(git, commit, s.getFileName, s.getLineNumber)
+      s.computeOtherInfo(node)
+    })
     return statements
   }
 }
