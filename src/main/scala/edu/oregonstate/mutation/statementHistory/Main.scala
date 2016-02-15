@@ -60,9 +60,10 @@ object Main {
     else
       StatementFinder
 
-    val detector = new NodeChangeDetector(Git.open(config.repo), finder)
+    val git = Git.open(config.repo)
+    val detector = new NodeChangeDetector(git, finder)
     val statements = config.jsonFile match {
-      case Some(x) => JSONDecoder.decode(x)
+      case Some(x) => JSONDecoder.decode(x, git, config.commit, finder)
       case None => getAllNodesInRepo(finder, config)
     }
 
