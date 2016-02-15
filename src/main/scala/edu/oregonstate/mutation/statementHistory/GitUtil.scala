@@ -3,6 +3,8 @@ package edu.oregonstate.mutation.statementHistory
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.diff.{DiffEntry, DiffFormatter, RawTextComparator}
 import org.eclipse.jgit.revwalk.{RevCommit, RevTree}
+import org.eclipse.jgit.treewalk.TreeWalk
+import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import org.gitective.core.{BlobUtils, CommitUtils}
 
@@ -36,4 +38,24 @@ object GitUtil {
     CommitUtils.getCommit(git.getRepository, sha)
   }
 
+  def findFullPath(git: Git, commitID: String, path: String): String = {
+    val commit = getCommit(git, commitID)
+    val tree = commit.getTree
+    val walk = new TreeWalk(git.getRepository)
+    walk.addTree(tree)
+    walk.setRecursive(true)
+    walk.setFilter(PathSuffixFilter.create(path))
+    walk.next()
+    walk.getPathString
+  }
+
+  def findFullPath(git: Git, commit: RevCommit, path: String): String = {
+    val tree = commit.getTree
+    val walk = new TreeWalk(git.getRepository)
+    walk.addTree(tree)
+    walk.setRecursive(true)
+    walk.setFilter(PathSuffixFilter.create(path))
+    walk.next()
+    walk.getPathString
+  }
 }

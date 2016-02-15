@@ -16,7 +16,7 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
 
   def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD", order: Value = BOTH): Seq[CommitInfo] = {
     val finder = new CommitFinder(git)
-    val fullPath = findFullPath(GitUtil.getCommit(git, commit), filePath)
+    val fullPath = GitUtil.findFullPath(git, commit, filePath)
     val before = finder.findAllCommits(fullPath, commit)
     val after = finder.findAllCommits(fullPath, "HEAD").filter(c => !before.contains(c)).+:(before.last)
 
@@ -139,13 +139,5 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
     isInNode(node.getParent, target)
   }
 
-  private def findFullPath(commit: RevCommit, path: String): String = {
-    val tree = commit.getTree
-    val walk = new TreeWalk(git.getRepository)
-    walk.addTree(tree)
-    walk.setRecursive(true)
-    walk.setFilter(PathSuffixFilter.create(path))
-    walk.next()
-    walk.getPathString
-  }
+
 }
