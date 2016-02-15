@@ -2,6 +2,7 @@ package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
 
+import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 import play.api.libs.json.Json
 
@@ -30,13 +31,13 @@ object JSONDecoder {
     }).toSeq
   }
 
-  def decode(file: File, git: Git, commit: String, finder: NodeFinder): Seq[StatementInfo] =
-    decode(Source.fromFile(file).mkString, git, commit, finder)
+  def decode(file: File, find: (String, Int) => ASTNode): Seq[StatementInfo] =
+    decode(Source.fromFile(file).mkString, find)
 
-  def decode(json: String, git: Git, commit: String, finder: NodeFinder) : Seq[StatementInfo] = {
+  def decode(json: String, find: (String, Int) => ASTNode) : Seq[StatementInfo] = {
     val statements = decode(json)
     statements.foreach(s => {
-      val node = finder.findNode(git, commit, s.getFileName, s.getLineNumber)
+      val node = find(s.getFileName, s.getLineNumber)
       s.computeOtherInfo(node)
     })
     return statements

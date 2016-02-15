@@ -62,8 +62,10 @@ object Main {
 
     val git = Git.open(config.repo)
     val detector = new NodeChangeDetector(git, finder)
+    val find = (name: String, number: Int) =>
+      finder.findNode(git, config.commit, name, number)
     val statements = config.jsonFile match {
-      case Some(x) => JSONDecoder.decode(x, git, config.commit, finder)
+      case Some(x) => JSONDecoder.decode(x, find)
       case None => getAllNodesInRepo(finder, config)
     }
 
