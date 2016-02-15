@@ -38,16 +38,8 @@ object GitUtil {
     CommitUtils.getCommit(git.getRepository, sha)
   }
 
-  def findFullPath(git: Git, commitID: String, path: String): String = {
-    val commit = getCommit(git, commitID)
-    val tree = commit.getTree
-    val walk = new TreeWalk(git.getRepository)
-    walk.addTree(tree)
-    walk.setRecursive(true)
-    walk.setFilter(PathSuffixFilter.create(path))
-    walk.next()
-    walk.getPathString
-  }
+  def findFullPath(git: Git, commitID: String, path: String): String =
+    findFullPath(git, getCommit(git, commitID), path)
 
   def findFullPath(git: Git, commit: RevCommit, path: String): String = {
     val tree = commit.getTree
