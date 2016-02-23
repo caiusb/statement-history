@@ -42,14 +42,14 @@ class CommitFinderTest extends GitTest {
   }
 
   it should "find file from incomplete path" in {
-    var first = add("src/bla/A.java", "public class A{}")
+    val first = add("src/bla/A.java", "public class A{}")
     val all = fileFinder.findAllCommits("A.java", "HEAD")
     all should have size 1
     all(0) should equal (first getName)
   }
 
   it should "find the file three times" in {
-    var first = add("A.java", "public class A{}");
+    val first = add("A.java", "public class A{}");
     val second = add("A.java", "public class A2{}");
     var third = add("A.java", "public class A3{}");
     val expected = Seq(first.getName, second.getName, third.getName)
@@ -59,9 +59,9 @@ class CommitFinderTest extends GitTest {
   }
 
   it should "find part of the history" in {
-    var first = add("A.java", "public class A{}")
+    val first = add("A.java", "public class A{}")
     val second = add("A.java", "public class A2{}")
-    var third = add("A.java", "public class A3{}")
+    val third = add("A.java", "public class A3{}")
     val expected = List(first.getName, second.getName)
     val all = fileFinder.findAllCommits("A.java", second.getName)
     all should have size expected.size

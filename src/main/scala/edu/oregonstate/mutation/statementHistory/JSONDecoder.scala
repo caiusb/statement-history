@@ -14,14 +14,14 @@ object JSONDecoder {
   }
 
   def decodeLine(line: String): StatementInfo = {
-    var parsed = Json.parse(line)
-    var file = (parsed \ "mutant" \ "filename").as[String]
-    var rawLineNo = parsed \ "mutant" \ "line"
-    var lineNo = rawLineNo.asOpt[Int] match {
+    val parsed = Json.parse(line)
+    val file = (parsed \ "mutant" \ "filename").as[String]
+    val rawLineNo = parsed \ "mutant" \ "line"
+    val lineNo = rawLineNo.asOpt[Int] match {
       case Some(x) => x
       case _ => rawLineNo.as[String].toInt
     }
-    var className = (parsed \ "mutant" \ "id" \ "location" \ "class").as[String]
+    val className = (parsed \ "mutant" \ "id" \ "location" \ "class").as[String]
     return new StatementInfo(file, lineNo, className)
   }
 

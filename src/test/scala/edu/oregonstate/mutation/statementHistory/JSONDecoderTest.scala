@@ -13,8 +13,8 @@ import scala.io.Source
 class JSONDecoderTest extends GitTest {
 
   it should "decode one line" in {
-    var resource = getClass.getResource("/oneline.json")
-    var content = Source.fromFile(new File(resource.getFile)).mkString
+    val resource = getClass.getResource("/oneline.json")
+    val content = Source.fromFile(new File(resource.getFile)).mkString
     val result = JSONDecoder.decode(content)
     result should not be null
     result should have size 1
@@ -24,8 +24,8 @@ class JSONDecoderTest extends GitTest {
   }
 
   it should "decode two lines" in {
-    var resource = getClass.getResource("/twolines.json")
-    var content = Source.fromFile(new File(resource.getFile)).mkString
+    val resource = getClass.getResource("/twolines.json")
+    val content = Source.fromFile(new File(resource.getFile)).mkString
     val result = JSONDecoder.decode(content)
     result should not be null
     result should have size 2
@@ -35,14 +35,14 @@ class JSONDecoderTest extends GitTest {
   }
 
   it should "decode this tricky line" in {
-    var resource = getClass.getResource("/trickyline.json")
-    var result = JSONDecoder.decode(new File(resource.getFile))
+    val resource = getClass.getResource("/trickyline.json")
+    val result = JSONDecoder.decode(new File(resource.getFile))
     result should have size 1
   }
 
   it should "decode with a repo in a file" in {
     val commit = add("A.java", "public class A{\npublic void m(){\nint x=3;}}")
-    var resource = getClass.getResource("/repo.json")
+    val resource = getClass.getResource("/repo.json")
     val statements = JSONDecoder.decode(new File(resource.getFile), (x: String, n: Int) => BlockFinder.findNode(Git.open(repo), commit.getName, x, n))
     statements should have size 1
     statements(0).printInfo should equal ("A.java,3,method(2:3),")
@@ -50,7 +50,7 @@ class JSONDecoderTest extends GitTest {
 
   it should "decode with a repo in a string" in {
     val commit = add("A.java", "public class A{\npublic void m(){\nint x=3;}}")
-    var resource = getClass.getResource("/repo.json")
+    val resource = getClass.getResource("/repo.json")
     val statements = JSONDecoder.decode(Source.fromFile(new File(resource.getFile)).mkString, (x: String, n: Int) => BlockFinder.findNode(Git.open(repo), commit.getName, x, n))
     statements should have size 1
     statements(0).printInfo should equal ("A.java,3,method(2:3),")
