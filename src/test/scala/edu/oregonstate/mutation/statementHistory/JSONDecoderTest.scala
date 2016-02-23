@@ -43,8 +43,7 @@ class JSONDecoderTest extends GitTest {
   it should "decode with a repo" in {
     val commit = add("A.java", "public class A{\npublic void m(){\nint x=3;}}")
     var resource = getClass.getResource("/repo.json")
-    val content = Source.fromFile(resource.getFile).mkString
-    val statements = JSONDecoder.decode(content, (x: String, n: Int) => BlockFinder.findNode(Git.open(repo), commit.getName, x, n))
+    val statements = JSONDecoder.decode(new File(resource.getFile), (x: String, n: Int) => BlockFinder.findNode(Git.open(repo), commit.getName, x, n))
     statements should have size 1
     statements(0).printInfo should equal ("A.java,3,method(2:3),")
   }
