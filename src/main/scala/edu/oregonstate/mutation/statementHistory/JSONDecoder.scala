@@ -7,11 +7,7 @@ import play.api.libs.json.Json
 
 import scala.io.Source
 
-object JSONDecoder {
-
-  def decode(file: File) : Seq[StatementInfo] = {
-    Source.fromFile(file).getLines().map(decodeLine).toSeq
-  }
+object JSONDecoder extends Decoder {
 
   def decodeLine(line: String): StatementInfo = {
     val parsed = Json.parse(line)
@@ -23,12 +19,6 @@ object JSONDecoder {
     }
     val className = (parsed \ "mutant" \ "id" \ "location" \ "class").as[String]
     return new StatementInfo(file, lineNo, className)
-  }
-
-  def decode(json: String) : Seq[StatementInfo] = {
-    json.split("\n").map(line => {
-      decodeLine(line)
-    }).toSeq
   }
 
   def decode(file: File, find: (String, Int) => ASTNode): Seq[StatementInfo] = {
