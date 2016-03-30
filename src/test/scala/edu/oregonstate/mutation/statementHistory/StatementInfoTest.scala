@@ -21,57 +21,57 @@ class StatementInfoTest extends GitTest {
 
   it should "have the correct info for a if block" in {
     val node = find(add(FILE_NAME, makeClass("if(true)")))
-    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,if(4:5),")
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,if(4:5),Block,")
   }
 
   it should "have the correct info for a while block" in {
     val node = find(add(FILE_NAME, makeClass("while(true)")))
-    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,while(4:5),")
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,while(4:5),Block,")
   }
 
   it should "have the correct info for a for block" in {
     val node = find(add(FILE_NAME, makeClass("for(int i=0;i<10;i++)")))
-    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,for(4:5),")
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,for(4:5),Block,")
   }
 
   it should "have the correct info for an enhanced for block" in {
     val node = find(add(FILE_NAME, makeClass("for(String x:xes)")))
-    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,for(4:5),")
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,for(4:5),Block,")
   }
 
   it should "have the correct info for a do-while block" in {
     val commit = add(FILE_NAME, "public class A{\npublic void m(){\ndo {\nint x=3;\n}while(true);\n}\n}")
     val node = BlockFinder.findNode(Git.open(repo), commit.getName, FILE_NAME, 4)
-    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",3,do(3:5),")
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",3,do(3:5),Block,")
   }
 
   it should "have the correct info for a try block" in {
     val node = find(add(FILE_NAME, "public class A{\npublic void m(){\ntry\n{\nint x=3;}catch(Exception e){}}}"))
-    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,try(4:5),")
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",4,try(4:5),Block,")
   }
 
   it should "have the correct info for a catch block" in {
     val commit = add(FILE_NAME, "public class A{\npublic void m(){\ntry\n{\nint x=3;}catch(Exception e){\nint y=3;}}}")
     val node = BlockFinder.findNode(Git.open(repo), commit.getName, FILE_NAME, 5)
-    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",5,catch(5:6),")
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",5,catch(5:6),Block,")
   }
 
   it should "have the correct info for a method body" in {
     val commit = add(FILE_NAME, "public class A{\npublic void m(){\nint x=3;}}}")
     val node = BlockFinder.findNode(Git.open(repo), commit.getName, FILE_NAME, 3)
-    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",2,method(2:3),")
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",2,method(2:3),Block,")
   }
 
   it should "have the correct info for a static block" in {
     val commit = add(FILE_NAME, "public class A{\n{int x=3;\n}}")
     val node = BlockFinder.findNode(Git.open(repo), commit.getName, FILE_NAME, 2)
-    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",2,static(2:3),")
+    new StatementInfo(FILE_NAME, node).printInfo should equal (FILE_NAME + ",2,static(2:3),Block,")
   }
 
   it should "have the correct info for a method" in {
     val commit = add(FILE_NAME, "public class A{\npublic void m(){\nint x=3;\n}}")
     val node = MethodFinder.findNode(Git.open(repo), commit.getName, FILE_NAME, 3)
-    new StatementInfo(FILE_NAME, node, 3).printInfo should equal (FILE_NAME + ",3,m,")
+    new StatementInfo(FILE_NAME, node, 3).printInfo should equal (FILE_NAME + ",3,m,MethodDeclaration,")
   }
 
 }

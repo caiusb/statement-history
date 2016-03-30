@@ -8,6 +8,7 @@ import org.eclipse.jdt.core.dom._
 class StatementInfo(private var fileName: String, private var lineNumber: Int, private var className: String) {
 
   private var otherInfo = ""
+  private var nodeType = ""
 
   def this(file: String, node: ASTNode, lineNo: Int) {
     this(file, lineNo, "")
@@ -27,7 +28,11 @@ class StatementInfo(private var fileName: String, private var lineNumber: Int, p
         getMethodInfo(m)
       case _ => ""
     }
+    nodeType = computeNodeType(node)
   }
+
+  def computeNodeType(node: ASTNode) =
+    node.getClass.getCanonicalName.split("\\.").last
 
   private def getBlockInfo(b: Block): String = {
     val root = b.getRoot.asInstanceOf[CompilationUnit]
@@ -54,5 +59,5 @@ class StatementInfo(private var fileName: String, private var lineNumber: Int, p
 
   def getClassName: String = className
 
-  def printInfo: String = getFileName + "," + getLineNumber + "," + otherInfo
+  def printInfo: String = getFileName + "," + getLineNumber + "," + otherInfo + nodeType + ","
 }
