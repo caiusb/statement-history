@@ -12,7 +12,7 @@ object Main {
   private[statementHistory] case class Config(method: Boolean = false,
                         block: Boolean = false,
                         repo: File = new File("."),
-                        jsonFile: Option[File] = None,
+                        statementFile: Option[File] = None,
                         commit: String = "HEAD",
                         file:Option[String] = None,
                         forward: Boolean = false,
@@ -30,9 +30,9 @@ object Main {
       opt[String]('r', "repo") required() action { (x,c) =>
         c.copy(repo=new File(x))
       } text("The location of the repository")
-      opt[String]('j', "json-file") action { (x,c) =>
-        c.copy(jsonFile = Some(new File(x)))
-      } text("The json file with the mutants")
+      opt[String]('s', "statement-file") action { (x,c) =>
+        c.copy(statementFile = Some(new File(x)))
+      } text("The file with the mutants, by defaults, it's a CSV")
       opt[String]('c', "commit") action{ (x,c) =>
         c.copy(commit = x)
       } text("The commit to reference the line number to; default is HEAD")

@@ -19,8 +19,8 @@ class MainTest extends GitTest {
   }
 
   it should "correctly get the json file" in {
-    parse("-c c -j test -r r").jsonFile should equal (Some(new File("test")))
-    parse("-c c --json-file test -r -r").jsonFile should equal (Some(new File("test")))
+    parse("-c c -j test -r r").statementFile should equal (Some(new File("test")))
+    parse("-c c --json-file test -r -r").statementFile should equal (Some(new File("test")))
   }
 
   it should "correcly get the repo path" in {
