@@ -31,12 +31,12 @@ object Main {
       opt[String]('r', "repo") required() action { (x,c) =>
         c.copy(repo=new File(x))
       } text("The location of the repository")
-      opt[String]('s', "statement-file") action { (x,c) =>
+      opt[String]('j', "json-file") action { (x,c) =>
         c.copy(statementFile = Some(new File(x)))
-      } text("The file with the mutants, by defaults, it's a CSV")
+      } text("The file with the statemnts, by default, it's a JSON")
       opt[Unit]("csv") action { (_,c) =>
         c.copy(csvFile = true)
-      }
+      } text("The statement file is in CSV format")
       opt[String]('c', "commit") action{ (x,c) =>
         c.copy(commit = x)
       } text("The commit to reference the line number to; default is HEAD")
