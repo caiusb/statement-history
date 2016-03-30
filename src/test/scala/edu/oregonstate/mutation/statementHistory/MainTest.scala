@@ -31,7 +31,10 @@ class MainTest extends GitTest {
   it should "correctly get the output file" in {
     parse("-c c -j j -r r --out bla").file should equal(Some("bla"))
     parse("-c c -j j -r r -f bla").file should equal(Some("bla"))
+  }
 
+  it should "correctly get the csv option" in {
+    parse("-c c -j j -r r --csv").csvFile should be (true)
   }
 
   it should "correctly determine the order to be both" in {
