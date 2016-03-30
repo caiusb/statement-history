@@ -11,7 +11,8 @@ libraryDependencies ++= Seq(
   "org.eclipse.jdt" % "org.eclipse.jdt.core" % "3.10.0",
   "net.sf.trove4j" % "trove4j" % "3.0.3",
   "com.typesafe.play" %% "play-json" % "2.4.3",
-  "com.github.scopt" %% "scopt" % "3.3.0"
+  "com.github.scopt" %% "scopt" % "3.3.0",
+  "org.apache.commons" % "commons-csv" % "1.2"
 )
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"
