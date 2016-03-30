@@ -34,8 +34,8 @@ object Main {
       opt[String]('s', "statement-file") action { (x,c) =>
         c.copy(statementFile = Some(new File(x)))
       } text("The file with the mutants, by defaults, it's a CSV")
-      opt[Boolean]("csv") action { (x,c) =>
-        c.copy(csvFile = x)
+      opt[Unit]("csv") action { (_,c) =>
+        c.copy(csvFile = true)
       }
       opt[String]('c', "commit") action{ (x,c) =>
         c.copy(commit = x)
