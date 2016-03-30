@@ -20,22 +20,4 @@ object JSONDecoder extends Decoder {
     val className = (parsed \ "mutant" \ "id" \ "location" \ "class").as[String]
     return new StatementInfo(file, lineNo, className)
   }
-
-  def decode(file: File, find: (String, Int) => ASTNode): Seq[StatementInfo] = {
-    val statements = Source.fromFile(file).getLines().map(decodeLine).toSeq
-    computeExtraInfo(find, statements)
-  }
-
-  def decode(json: String, find: (String, Int) => ASTNode) : Seq[StatementInfo] = {
-    val statements = decode(json)
-    computeExtraInfo(find, statements)
-  }
-
-  private def computeExtraInfo(find: (String, Int) => ASTNode, statements: Seq[StatementInfo]): Seq[StatementInfo] = {
-    statements.foreach(s => {
-      val node = find(s.getFileName, s.getLineNumber)
-      s.computeOtherInfo(node)
-    })
-    return statements
-  }
 }
