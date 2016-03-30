@@ -13,6 +13,7 @@ object Main {
                         block: Boolean = false,
                         repo: File = new File("."),
                         statementFile: Option[File] = None,
+                        csvFile: Boolean = false,
                         commit: String = "HEAD",
                         file:Option[String] = None,
                         forward: Boolean = false,
@@ -33,6 +34,9 @@ object Main {
       opt[String]('s', "statement-file") action { (x,c) =>
         c.copy(statementFile = Some(new File(x)))
       } text("The file with the mutants, by defaults, it's a CSV")
+      opt[Boolean]("csv") action { (x,c) =>
+        c.copy(csvFile = x)
+      }
       opt[String]('c', "commit") action{ (x,c) =>
         c.copy(commit = x)
       } text("The commit to reference the line number to; default is HEAD")
@@ -62,10 +66,15 @@ object Main {
 
     val git = Git.open(config.repo)
     val detector = new NodeChangeDetector(git, finder)
+    val decoder = if (config.csvFile)
+      CSVDecoder
+    else
+      JSONDecoder
+
     val find = (name: String, number: Int) =>
       finder.findNode(git, config.commit, GitUtil.findFullPath(git, config.commit, name), number)
-    val statements = config.jsonFile match {
-      case Some(x) => JSONDecoder.decode(x, find)
+    val statements = config.statementFile match {
+      case Some(x) => decoder.decode(x, find)
       case None => getAllNodesInRepo(finder, config)
     }
 
