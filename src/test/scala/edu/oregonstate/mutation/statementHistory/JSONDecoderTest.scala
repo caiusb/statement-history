@@ -45,7 +45,7 @@ class JSONDecoderTest extends GitTest {
     val resource = getClass.getResource("/repo.json")
     val statements = JSONDecoder.decode(new File(resource.getFile), (x: String, n: Int) => BlockFinder.findNode(Git.open(repo), commit.getName, x, n))
     statements should have size 1
-    statements(0).printInfo should equal ("A.java,3,method(2:3),Block,")
+    statements(0).printInfo should equal ("A.java,3,method(2:3),Block,A,m,")
   }
 
   it should "decode with a repo in a string" in {
@@ -53,6 +53,6 @@ class JSONDecoderTest extends GitTest {
     val resource = getClass.getResource("/repo.json")
     val statements = JSONDecoder.decode(Source.fromFile(new File(resource.getFile)).mkString, (x: String, n: Int) => BlockFinder.findNode(Git.open(repo), commit.getName, x, n))
     statements should have size 1
-    statements(0).printInfo should equal ("A.java,3,method(2:3),Block,")
+    statements(0).printInfo should equal ("A.java,3,method(2:3),Block,A,m,")
   }
 }

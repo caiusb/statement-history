@@ -9,6 +9,8 @@ class StatementInfo(private var fileName: String, private var lineNumber: Int, p
 
   private var otherInfo = ""
   private var nodeType = ""
+  private var enclosingClass = ""
+  private var enclosingMethod = ""
 
   def this(file: String, node: ASTNode, lineNo: Int) {
     this(file, lineNo, "")
@@ -29,10 +31,30 @@ class StatementInfo(private var fileName: String, private var lineNumber: Int, p
       case _ => ""
     }
     nodeType = computeNodeType(node)
+    enclosingClass = findEnclosingClass(node)
+    enclosingMethod = findEnclosingMethod(node)
   }
 
+  def findEnclosingClass(node: ASTNode): String =
+    node match {
+      case null => ""
+      case x : TypeDeclaration => x.getName.getIdentifier
+      case x : ASTNode => findEnclosingClass(x.getParent)
+    }
+
+  def findEnclosingMethod(node: ASTNode): String =
+    node match {
+      case null => ""
+      case x : MethodDeclaration => x.getName.getIdentifier
+      case x : ASTNode => findEnclosingMethod(x.getParent)
+    }
+
+
   def computeNodeType(node: ASTNode) =
-    node.getClass.getCanonicalName.split("\\.").last
+    if (node != null)
+      node.getClass.getCanonicalName.split("\\.").last
+    else
+      ""
 
   private def getBlockInfo(b: Block): String = {
     val root = b.getRoot.asInstanceOf[CompilationUnit]
@@ -59,5 +81,5 @@ class StatementInfo(private var fileName: String, private var lineNumber: Int, p
 
   def getClassName: String = className
 
-  def printInfo: String = getFileName + "," + getLineNumber + "," + otherInfo + nodeType + ","
+  def printInfo: String = getFileName + "," + getLineNumber + "," + otherInfo + nodeType + "," + enclosingClass + "," + enclosingMethod + ","
 }

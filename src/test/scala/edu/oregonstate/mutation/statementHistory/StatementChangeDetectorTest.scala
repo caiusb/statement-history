@@ -197,4 +197,23 @@ class StatementChangeDetectorTest extends GitTest with NodeChangeDetectorTest {
     commits should have size (expected.size)
     commits should equal (expected)
   }
+
+  it should "not track a curly brace" in {
+    val first = add("A.java", "public class A{\npublic void m()\n{\nint x=3;\n}\n}")
+    val second = add("A.java", "public class A{\npublic void m(){\nint x=33;\n}\n}")
+
+    val commits = nd(git).findCommits("A.java", 3, first.getName, Order.FORWARD)
+    commits should have size 0
+  }
+
+  it should "track across line moves" in {
+    val first = add("A.java", "public class A{\npublic void m(){\nint x=3;\n}\n}")
+    val second = add("A.java", "public class A{\npublic void m(){\nint y=32;\nint x=3;\n}\n}")
+    val third = add("A.java", "public class A{\npublic void m(){\nint y=32;\nint x=7;\n}\n}")
+    val expected = Seq(ci(first.getName, "ADD"), ci(third.getName, "UPDATE"))
+
+    val commits = nd(git).findCommits("A.java", 3, first.getName, Order.BOTH)
+    commits should have size 2
+    commits should equal (expected)
+  }
 }
