@@ -72,10 +72,9 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
         case _: Move => return Some(new ChangeInfo(nextLine, Seq(new CommitInfo(newCommit, "MOVE"))))
         case _: Insert if nextLine == -1 => return Some(new ChangeInfo(nextLine, Seq(new CommitInfo(newCommit, "ADD"))))
         case _: Delete if nextLine == -1 => return Some(new ChangeInfo(nextLine, Seq(new CommitInfo(newCommit, "DELETE"))))
-        case _ => ;
       }
     })
-    return None
+    return Some(new ChangeInfo(nextLine, Seq()))
   }
 
   def processActions(actions: Seq[Action], matchings: MappingStore, propagateForward: Boolean): Seq[Action] = {
