@@ -89,9 +89,7 @@ object Main {
       statement.printInfo +
         detector.findCommits(statement.getFileName, statement.getLineNumber, config.commit, order).map(commit => commit + ",").
           foldRight[String]("")((c, e) => c + e) + "\n"
-    }).reduceRight((current, element) => current + element)
-
-    outputStream.write(result.getBytes)
+    }).foreach(r => outputStream.write(r.getBytes))
   }
 
   private[statementHistory] def getAllNodesInRepo(finder: NodeFinder = StatementFinder, config: Config): Seq[StatementInfo] = {
