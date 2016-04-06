@@ -12,8 +12,9 @@ class StatementVisitor() extends ASTVisitor {
   
   def visitStatement(node: Statement):Boolean = {
     val startPosition = node.getStartPosition
-    val line = node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(startPosition)
-    statementMap(line) = node
+    val startLine = node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(startPosition)
+    val endLine = node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(startPosition + node.getLength)
+    (startLine to endLine).foreach(l => statementMap(l) = node)
     return false
   }
 

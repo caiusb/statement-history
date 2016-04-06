@@ -20,8 +20,7 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
     val cu = putStatementInCU(stmt)
     val ast = getAST(cu)
     ast.accept(visitor)
-    val stmtMap = visitor.getStatementMap
-    stmtMap
+    visitor.getStatementMap
   }
 
   private def checkCU(stmt: String, expected: Int): ASTNode = {
@@ -64,7 +63,7 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
     checkStatement("break;")
 
   it should "find a do statement" in
-    checkStatement("do {\nint x=3;}\nwhile(true);", 2)
+    checkStatement("do {\nint x=3;}\nwhile(true);", 3)
 
   it should "not find a empty statement" in {
     val map = getStatementMap(";")
@@ -99,7 +98,14 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
     checkStatement("while(true){;}")
 
   it should "find a statement in a try block" in {
-    val node = checkCU("public class A{\npublic void m() { try{\nint x=3;\n}catch(Exception e){}}}", 2)
+    val node = checkCU("public class A{\npublic void m() { try{\nint x=3;\n}catch(Exception e){}}}", 3)
     node shouldBe an [VariableDeclarationStatement]
+  }
+
+  it should "find a statement spanning multiple lines" in {
+    val stmtMap = getStatementMap("int \nx=3;")
+    stmtMap should have size 2
+    stmtMap(4) should not be null
+    stmtMap(4) shouldBe a [VariableDeclarationStatement]
   }
 }
