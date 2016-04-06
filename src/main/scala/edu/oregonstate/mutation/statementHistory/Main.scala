@@ -85,11 +85,12 @@ object Main {
 
     val order = getAnalysisOrder(config)
 
-    val result = statements.toParArray.map(statement => {
-      statement.printInfo +
+    val result = statements.toParArray.foreach(statement => {
+      val result = statement.printInfo +
         detector.findCommits(statement.getFileName, statement.getLineNumber, config.commit, order).map(commit => commit + ",").
           foldRight[String]("")((c, e) => c + e) + "\n"
-    }).foreach(r => outputStream.write(r.getBytes))
+      outputStream.write(result.getBytes)
+    })
   }
 
   private[statementHistory] def getAllNodesInRepo(finder: NodeFinder = StatementFinder, config: Config): Seq[StatementInfo] = {
