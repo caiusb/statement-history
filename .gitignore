@@ -7,3 +7,4 @@ target/
 .cache-main
 .idea_modules
 .idea
+.DS_Store
