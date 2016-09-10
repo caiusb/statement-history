@@ -3,8 +3,7 @@ package edu.oregonstate.mutation.statementHistory
 import java.io.{File, FileOutputStream, PrintStream}
 import java.util.logging.Level
 
-import fr.labri.gumtree.matchers.Matcher
-import org.eclipse.jdt.core.dom.CompilationUnit
+import com.github.gumtreediff.matchers.Matcher
 import org.eclipse.jgit.api.Git
 
 object Main {

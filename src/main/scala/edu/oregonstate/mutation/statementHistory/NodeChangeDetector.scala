@@ -1,16 +1,11 @@
 package edu.oregonstate.mutation.statementHistory
 
+import com.brindescu.gumtree.facade.Gumtree._
+import com.brindescu.gumtree.facade.{ASTDiff, Diff}
+import com.github.gumtreediff.actions.model._
 import edu.oregonstate.mutation.statementHistory.Order._
-import fr.labri.gumtree.actions.model._
-import fr.labri.gumtree.gen.jdt.JdtTree
-import fr.labri.gumtree.matchers.MappingStore
 import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit}
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.revwalk.RevCommit
-import org.eclipse.jgit.treewalk.TreeWalk
-import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
-
-import scala.collection.JavaConversions
 
 class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
 
@@ -38,9 +33,9 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
     beforeChanges ++ afterChanges
   }
 
-  def process(lineNo: Int, fullPath: String, commits: Seq[String], isReversed: Boolean): ChangeInfo = {
+  def process(lineNo: Int, fullPath: String, commits: Seq[String], forwardInTime: Boolean): ChangeInfo = {
     val lastBit = commits.sliding(2).foldLeft(new ChangeInfo(lineNo, List())) { (change, pair) =>
-      processPair(pair, fullPath, change.getLine, isReversed) match {
+      processPair(pair, fullPath, change.getLine, forwardInTime) match {
         case Some(x) => change.merge(x)
         case None => change
       }
@@ -48,23 +43,26 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
     lastBit
   }
 
-  private def processPair(pair: Seq[String], path: String, line: Int, propagateForward: Boolean): Option[ChangeInfo] = {
+  private def processPair(pair: Seq[String], path: String, line: Int, forwardInTime: Boolean): Option[ChangeInfo] = {
     if (pair.size != 2)
-    return None
+      return None
 
-    val oldCommit = if (propagateForward) pair(0) else pair(1)
-    val newCommit = if (propagateForward) pair(1) else pair(0)
+    val (oldCommit, newCommit) = if (forwardInTime) (pair(0), pair(1)) else (pair(1), pair(0))
 
-    val oldTree = ASTDiff.getTree(GitUtil.getFileContent(git, oldCommit, path))
-    val newTree = ASTDiff.getTree(GitUtil.getFileContent(git, newCommit, path))
-    val node = if (propagateForward)
-    finder.findNode(line, oldTree.asInstanceOf[JdtTree].getContainedNode)
+    val diff = ASTDiff.getDiff(GitUtil.getFileContent(git, oldCommit, path), GitUtil.getFileContent(git, newCommit, path))
+
+    val oldTree = diff.getLeftTree()
+    val newTree = diff.getRightTree()
+
+    val node = if (forwardInTime)
+      finder.findNode(line, oldTree.getNode)
     else
-    finder.findNode(line, newTree.asInstanceOf[JdtTree].getContainedNode)
-    val (actions, matchings) = ASTDiff.getActions(oldTree, newTree)
+      finder.findNode(line, newTree.getNode)
 
-    val nextLine = getNextLine(node, matchings, propagateForward)
-    var matchingActions = processActions(actions, matchings, propagateForward)
+    val actions = diff.getActions
+
+    val nextLine = getNextLine(node, diff, forwardInTime)
+    val matchingActions = processActions(actions, diff, forwardInTime)
     val statementActions = getActionsTouchingNode(node, matchingActions)
     statementActions.foreach(action => {
       action match {
@@ -78,12 +76,12 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
     return Some(new ChangeInfo(nextLine, Seq()))
   }
 
-  def processActions(actions: Seq[Action], matchings: MappingStore, propagateForward: Boolean): Seq[Action] = {
-    if (!propagateForward)
+  def processActions(actions: Seq[Action], diff: Diff, forwardInTime: Boolean): Seq[Action] = {
+    if (!forwardInTime)
       actions.map(action => action match {
-        case m: Update => new Update(matchings.getDst(m.getNode), "0")
+        case m: Update => new Update(diff.getMatch(m.getNode).get, "0")
         case m: Move =>
-          val node = matchings.getDst(m.getNode)
+          val node = diff.getMatch(m.getNode).get
           new Move(node, node.getParent, 1)
         case m => m
       })
@@ -93,7 +91,7 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
 
   private def getActionsTouchingNode(statement: ASTNode, actions: Seq[Action]): Seq[Action] = {
     actions.filter(action => {
-      val node = action.getNode.asInstanceOf[JdtTree].getContainedNode
+      val node = action.getNode.getNode
       isInNode(node, statement)
     }).sortWith((first, second) => {
       second match {
@@ -106,29 +104,16 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
     })
   }
 
-  private def getNextLine(astNode: ASTNode, matchings: MappingStore, followForward: Boolean): Int = {
-    convertToTuples(matchings).foreach(tupple => {
-      if (followForward)
-        tupple match {
-          case (s, x) if s == astNode =>
+  private def getNextLine(astNode: ASTNode, diff: Diff, forwardInTime: Boolean): Int = {
+    diff.getMatchedNodes.map{ case t => (t._1.getNode, t._2.getNode)}.foreach(
+        _ match {
+          case (x, s) if s == astNode && !forwardInTime =>
+            return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
+          case (s, x) if s == astNode && forwardInTime =>
             return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
           case _ => ;
-        }
-      else
-        tupple match {
-          case (x, s) if s == astNode =>
-            return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
-          case _ => ;
-        }
-    })
+        })
     return -1
-  }
-
-  private def convertToTuples(matchings: MappingStore): List[(ASTNode, ASTNode)] = {
-    JavaConversions.asScalaIterator(matchings.iterator).map(matching => {
-      (matching.getFirst.asInstanceOf[JdtTree].getContainedNode,
-        matching.getSecond.asInstanceOf[JdtTree].getContainedNode)
-    }).toList
   }
 
   def isInNode(node: ASTNode, target: ASTNode): Boolean = {
