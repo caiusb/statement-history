@@ -2,9 +2,6 @@ package edu.oregonstate.mutation.statementHistory
 
 import org.eclipse.jdt.core.dom.{ASTNode, ASTVisitor, CompilationUnit, MethodDeclaration}
 
-/**
- * Created by caius on 10/12/15.
- */
 object MethodFinder extends NodeFinder {
 
   private class MethodVisitor extends ASTVisitor {

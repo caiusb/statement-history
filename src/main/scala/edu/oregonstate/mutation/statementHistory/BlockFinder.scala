@@ -3,9 +3,6 @@ package edu.oregonstate.mutation.statementHistory
 import org.eclipse.jdt.core.dom.{CompilationUnit, Block, ASTVisitor, ASTNode}
 import scala.collection._
 
-/**
- * Created by caius on 2/11/16.
- */
 object BlockFinder extends NodeFinder {
 
   private class BlockVisitor extends ASTVisitor {

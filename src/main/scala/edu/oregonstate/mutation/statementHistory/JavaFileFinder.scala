@@ -9,9 +9,6 @@ import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 
-/**
- * Created by caius on 11/2/15.
- */
 object JavaFileFinder {
 
   def findIn(git: Git, commit: String = "HEAD"): List[String] = {

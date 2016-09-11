@@ -3,9 +3,6 @@ package edu.oregonstate.mutation.statementHistory
 import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 
-/**
- * Created by caius on 10/12/15.
- */
 trait NodeFinder {
 
   def findNode(git: Git, commitSHA: String, file: String, lineNumber: Int): ASTNode = {

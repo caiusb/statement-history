@@ -10,9 +10,6 @@ import org.gitective.core.{BlobUtils, CommitUtils}
 
 import scala.collection.JavaConversions
 
-/**
- * Created by caius on 9/25/15.
- */
 object GitUtil {
 
   def getDiffs(git: Git, commit: RevCommit): Seq[DiffEntry] = {

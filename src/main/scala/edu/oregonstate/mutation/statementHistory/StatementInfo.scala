@@ -2,9 +2,6 @@ package edu.oregonstate.mutation.statementHistory
 
 import org.eclipse.jdt.core.dom._
 
-/**
- * Created by caius on 9/25/15.
- */
 class StatementInfo(private var fileName: String, private var lineNumber: Int, private var className: String) {
 
   private var otherInfo = ""

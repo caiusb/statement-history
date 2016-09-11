@@ -4,9 +4,6 @@ import org.eclipse.core.runtime.NullProgressMonitor
 import org.eclipse.jdt.core.dom.AST._
 import org.eclipse.jdt.core.dom.ASTNode
 
-/**
- * Created by caius on 9/25/15.
- */
 object AST {
   def getAST(content: String): ASTNode = {
     import org.eclipse.jdt.core.dom.ASTParser._

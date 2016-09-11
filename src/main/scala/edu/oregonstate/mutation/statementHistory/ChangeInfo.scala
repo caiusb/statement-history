@@ -1,8 +1,5 @@
 package edu.oregonstate.mutation.statementHistory
 
-/**
- * Created by caius on 10/9/15.
- */
 protected class ChangeInfo(private var nextLine: Int,
                  private var commitInfos: Seq[CommitInfo]) {
 
