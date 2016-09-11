@@ -7,7 +7,7 @@ trait NodeFinder {
 
   def findNode(git: Git, commitSHA: String, file: String, lineNumber: Int): ASTNode = {
     val content: String = GitUtil.getFileContent(git, commitSHA, file)
-    val ast: ASTNode = AST.getAST(content)
+    val ast: ASTNode = AST.getJavaAST(content)
     findNode(lineNumber, ast)
   }
 
@@ -21,7 +21,7 @@ trait NodeFinder {
 
   def findAllNodesForFile(git: Git, commit: String, file: String): List[ASTNode] = {
     val content = GitUtil.getFileContent(git, commit, file)
-    val ast = AST.getAST(content)
+    val ast = AST.getJavaAST(content)
     getMapOfNodes(ast).values.toList
   }
 

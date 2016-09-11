@@ -18,14 +18,14 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   private def getStatementMap(stmt: String): Map[Int, Statement] = {
     val cu = putStatementInCU(stmt)
-    val ast = getAST(cu)
+    val ast = getJavaAST(cu)
     ast.accept(visitor)
     visitor.getStatementMap
   }
 
   private def checkCU(stmt: String, expected: Int): ASTNode = {
     val visitor = new StatementVisitor
-    getAST(stmt).accept(visitor)
+    getJavaAST(stmt).accept(visitor)
     assertStatement(visitor.getStatementMap, expected)
   }
 
