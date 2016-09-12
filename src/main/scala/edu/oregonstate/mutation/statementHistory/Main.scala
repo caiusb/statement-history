@@ -12,8 +12,6 @@ import org.eclipse.jgit.api.Git
 
 object Main {
 
-  private implicit def st(s: SuperTree): ASTNode = s.asInstanceOf[JavaTree]
-
   private[statementHistory] case class Config(method: Boolean = false,
                         block: Boolean = false,
                         repo: File = new File("."),
