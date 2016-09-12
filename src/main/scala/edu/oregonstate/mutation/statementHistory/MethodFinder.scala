@@ -1,7 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
 import com.brindescu.gumtree.facade.{SuperMethod, SuperTree}
-import org.eclipse.jdt.core.dom.{ASTVisitor, CompilationUnit, MethodDeclaration}
 
 object MethodFinder extends NodeFinder {
 

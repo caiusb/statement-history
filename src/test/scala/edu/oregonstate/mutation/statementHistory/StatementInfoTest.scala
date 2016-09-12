@@ -1,11 +1,11 @@
 package edu.oregonstate.mutation.statementHistory
 
+import com.brindescu.gumtree.facade.Gumtree._
 import com.brindescu.gumtree.facade.SuperTree
+import com.brindescu.gumtree.jdt.JavaTree
 import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
-import com.brindescu.gumtree.facade.Gumtree._
-import com.brindescu.gumtree.jdt.JavaTree
 
 /**
  * Created by caius on 2/11/16.

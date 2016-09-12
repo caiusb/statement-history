@@ -1,6 +1,5 @@
 package edu.oregonstate.mutation.statementHistory
 
-import com.brindescu.gumtree.jdt.JavaMethod
 import org.eclipse.jdt.core.dom.MethodDeclaration
 import org.scalatest.{FlatSpec, Matchers}
 

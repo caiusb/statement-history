@@ -1,6 +1,5 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.eclipse.jdt.core.dom.CompilationUnit
 import org.eclipse.jgit.api.Git
 
 class BlockFinderTest extends GitTest {

@@ -3,7 +3,6 @@ package edu.oregonstate.mutation.statementHistory
 import java.io.File
 
 import org.eclipse.jgit.api.Git
-import org.scalatest.{FlatSpec, Matchers}
 
 import scala.io.Source
 

@@ -14,7 +14,7 @@ addCommandAlias("idea", "update-classifiers; update-sbt-classifiers; gen-idea sb
 
 libraryDependencies ++= Seq(
   "org.eclipse.jgit" % "org.eclipse.jgit" % "4.0.2.201509141540-r",
-  "org.eclipse.jdt" % "org.eclipse.jdt.core" % "3.10.0",
+  "org.eclipse.jdt" % "org.eclipse.jdt.core" % "3.10.0" % "test",
   "net.sf.trove4j" % "trove4j" % "3.0.3",
   "com.typesafe.play" %% "play-json" % "2.4.3",
   "com.github.scopt" %% "scopt" % "3.3.0",

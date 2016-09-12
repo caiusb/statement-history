@@ -1,7 +1,7 @@
 package edu.oregonstate.mutation.statementHistory
 
 import com.brindescu.gumtree.facade.{SuperBlock, SuperTree}
-import org.eclipse.jdt.core.dom.{ASTNode, ASTVisitor, Block, CompilationUnit}
+import org.eclipse.jdt.core.dom.{ASTVisitor, Block, CompilationUnit}
 
 import scala.collection._
 

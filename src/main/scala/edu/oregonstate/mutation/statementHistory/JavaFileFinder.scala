@@ -1,12 +1,9 @@
 package edu.oregonstate.mutation.statementHistory
 
 import org.eclipse.jgit.api.Git
-import org.eclipse.jgit.revwalk.RevWalk
-import org.eclipse.jgit.revwalk.RevSort._
 import org.eclipse.jgit.treewalk.TreeWalk
 import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 
-import scala.collection.JavaConversions
 import scala.collection.mutable.ListBuffer
 
 object JavaFileFinder {

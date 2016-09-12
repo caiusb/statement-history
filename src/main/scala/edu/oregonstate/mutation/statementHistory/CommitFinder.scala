@@ -1,6 +1,5 @@
 package edu.oregonstate.mutation.statementHistory
 
-import java.io.File
 import java.util
 
 import org.eclipse.jgit.api.Git

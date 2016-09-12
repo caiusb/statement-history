@@ -5,7 +5,7 @@ import com.brindescu.gumtree.facade.{Diff, JavaASTDiff, SuperTree}
 import com.brindescu.gumtree.jdt.JavaTree
 import com.github.gumtreediff.actions.model._
 import edu.oregonstate.mutation.statementHistory.Order._
-import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit}
+import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 
 class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {

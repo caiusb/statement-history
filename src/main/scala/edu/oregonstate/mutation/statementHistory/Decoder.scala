@@ -2,13 +2,12 @@ package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
 
+import com.brindescu.gumtree.facade.Gumtree._
 import com.brindescu.gumtree.facade.SuperTree
-import edu.oregonstate.mutation.statementHistory.JSONDecoder._
+import com.brindescu.gumtree.jdt.JavaTree
 import org.eclipse.jdt.core.dom.ASTNode
 
 import scala.io.Source
-import com.brindescu.gumtree.facade.Gumtree._
-import com.brindescu.gumtree.jdt.JavaTree
 
 trait Decoder {
 

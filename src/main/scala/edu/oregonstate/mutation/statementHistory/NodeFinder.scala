@@ -1,7 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
 import com.brindescu.gumtree.facade.SuperTree
-import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 
 trait NodeFinder {

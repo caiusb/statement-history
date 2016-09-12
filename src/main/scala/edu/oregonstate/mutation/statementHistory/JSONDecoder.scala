@@ -1,11 +1,6 @@
 package edu.oregonstate.mutation.statementHistory
 
-import java.io.File
-
-import org.eclipse.jdt.core.dom.ASTNode
 import play.api.libs.json.Json
-
-import scala.io.Source
 
 object JSONDecoder extends Decoder {
 

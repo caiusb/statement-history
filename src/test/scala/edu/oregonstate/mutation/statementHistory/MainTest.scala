@@ -3,7 +3,6 @@ package edu.oregonstate.mutation.statementHistory
 import java.io.File
 
 import edu.oregonstate.mutation.statementHistory.Main.Config
-import org.scalatest.{Matchers, FlatSpec}
 
 /**
  * Created by caius on 10/30/15.
