@@ -1,6 +1,7 @@
 package edu.oregonstate.mutation.statementHistory
 
-import edu.oregonstate.mutation.statementHistory.AST._
+import com.brindescu.gumtree.facade.Gumtree._
+import edu.oregonstate.mutation.statementHistory.JavaParser._
 import org.eclipse.jdt.core.dom.{ASTNode, Statement, VariableDeclarationStatement}
 import org.scalatest._
 
@@ -18,14 +19,14 @@ class StatementVisitorTest extends FlatSpec with Matchers with BeforeAndAfter {
 
   private def getStatementMap(stmt: String): Map[Int, Statement] = {
     val cu = putStatementInCU(stmt)
-    val ast = getJavaAST(cu)
+    val ast = parse(cu)
     ast.accept(visitor)
     visitor.getStatementMap
   }
 
   private def checkCU(stmt: String, expected: Int): ASTNode = {
     val visitor = new StatementVisitor
-    getJavaAST(stmt).accept(visitor)
+    parse(stmt).accept(visitor)
     assertStatement(visitor.getStatementMap, expected)
   }
 

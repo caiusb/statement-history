@@ -1,13 +1,16 @@
 package edu.oregonstate.mutation.statementHistory
 
 import com.brindescu.gumtree.facade.Gumtree._
-import com.brindescu.gumtree.facade.{ASTDiff, Diff}
+import com.brindescu.gumtree.facade.{Diff, JavaASTDiff, SuperTree}
+import com.brindescu.gumtree.jdt.JavaTree
 import com.github.gumtreediff.actions.model._
 import edu.oregonstate.mutation.statementHistory.Order._
 import org.eclipse.jdt.core.dom.{ASTNode, CompilationUnit}
 import org.eclipse.jgit.api.Git
 
 class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
+
+  private implicit def st(s: SuperTree): ASTNode = s.asInstanceOf[JavaTree]
 
   def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD", order: Value = BOTH): Seq[CommitInfo] = {
     val finder = new CommitFinder(git)
@@ -49,15 +52,15 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
 
     val (oldCommit, newCommit) = if (forwardInTime) (pair(0), pair(1)) else (pair(1), pair(0))
 
-    val diff = ASTDiff.getDiff(GitUtil.getFileContent(git, oldCommit, path), GitUtil.getFileContent(git, newCommit, path))
+    val diff = JavaASTDiff.getDiff(GitUtil.getFileContent(git, oldCommit, path), GitUtil.getFileContent(git, newCommit, path))
 
     val oldTree = diff.getLeftTree()
     val newTree = diff.getRightTree()
 
     val node = if (forwardInTime)
-      finder.findNode(line, oldTree.getNode)
+      finder.findNode(line, oldTree.getASTNode)
     else
-      finder.findNode(line, newTree.getNode)
+      finder.findNode(line, newTree.getASTNode)
 
     val actions = diff.getActions
 
@@ -91,7 +94,7 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
 
   private def getActionsTouchingNode(statement: ASTNode, actions: Seq[Action]): Seq[Action] = {
     actions.filter(action => {
-      val node = action.getNode.getNode
+      val node = action.getNode.getASTNode
       isInNode(node, statement)
     }).sortWith((first, second) => {
       second match {
@@ -105,11 +108,11 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
   }
 
   private def getNextLine(astNode: ASTNode, diff: Diff, forwardInTime: Boolean): Int = {
-    diff.getMatchedNodes.map{ case t => (t._1.getNode, t._2.getNode)}.foreach(
+    diff.getMatchedNodes.map{ case t => (t._1.getASTNode, t._2.getASTNode)}.foreach(
         _ match {
-          case (x, s) if s == astNode && !forwardInTime =>
+          case (x, s) if s.asInstanceOf[JavaTree].getUnderlyingNode == astNode && !forwardInTime =>
             return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
-          case (s, x) if s == astNode && forwardInTime =>
+          case (s, x) if s.asInstanceOf[JavaTree].getUnderlyingNode == astNode && forwardInTime =>
             return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
           case _ => ;
         })
@@ -123,6 +126,4 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
       return true
     isInNode(node.getParent, target)
   }
-
-
 }

@@ -19,7 +19,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play" %% "play-json" % "2.4.3",
   "com.github.scopt" %% "scopt" % "3.3.0",
   "org.apache.commons" % "commons-csv" % "1.2",
-  "com.brindescu" %% "gumtree-facade" % "0.5.1"
+  "com.brindescu" %% "gumtree-facade" % "0.5.5"
 )
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.4" % "test"

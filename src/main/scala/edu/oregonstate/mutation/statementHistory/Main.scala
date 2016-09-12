@@ -16,7 +16,8 @@ object Main {
                         commit: String = "HEAD",
                         file:Option[String] = None,
                         forward: Boolean = false,
-                        reverse: Boolean = false) {
+                        reverse: Boolean = false,
+                        c: Boolean = false) {
   }
 
   private[statementHistory] def parseCmdOptions(args: Array[String]): Option[Config] = {
@@ -48,6 +49,9 @@ object Main {
       opt[Unit]("reverse") action { (_, c) =>
         c.copy(reverse = true)
       } text("Perform the analysis only on the commits that preceed the referece commit, inclusive")
+      opt[Unit]("c-parser") action { (_, c) =>
+        c.copy(c = true)
+      } text("Use the C parser instead of the Java one")
     }
 
     parser.parse(args, Config())

@@ -3,11 +3,15 @@ package edu.oregonstate.mutation.statementHistory
 import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 
+import com.brindescu.gumtree.facade.Gumtree._
+
 trait NodeFinder {
+
+//  var parser: ASTParser
 
   def findNode(git: Git, commitSHA: String, file: String, lineNumber: Int): ASTNode = {
     val content: String = GitUtil.getFileContent(git, commitSHA, file)
-    val ast: ASTNode = AST.getJavaAST(content)
+    val ast: ASTNode = JavaParser.parse(content)
     findNode(lineNumber, ast)
   }
 
@@ -21,7 +25,7 @@ trait NodeFinder {
 
   def findAllNodesForFile(git: Git, commit: String, file: String): List[ASTNode] = {
     val content = GitUtil.getFileContent(git, commit, file)
-    val ast = AST.getJavaAST(content)
+    val ast = JavaParser.parse(content)
     getMapOfNodes(ast).values.toList
   }
 
