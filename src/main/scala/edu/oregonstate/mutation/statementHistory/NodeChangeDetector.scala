@@ -110,9 +110,9 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
   private def getNextLine(astNode: ASTNode, diff: Diff, forwardInTime: Boolean): Int = {
     diff.getMatchedNodes.map{ case t => (t._1.getASTNode, t._2.getASTNode)}.foreach(
         _ match {
-          case (x, s) if s.asInstanceOf[JavaTree].getUnderlyingNode == astNode && !forwardInTime =>
+          case (x, s) if s == astNode && !forwardInTime =>
             return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
-          case (s, x) if s.asInstanceOf[JavaTree].getUnderlyingNode == astNode && forwardInTime =>
+          case (s, x) if s == astNode && forwardInTime =>
             return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
           case _ => ;
         })
