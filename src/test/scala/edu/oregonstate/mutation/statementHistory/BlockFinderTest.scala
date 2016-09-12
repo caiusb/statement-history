@@ -14,7 +14,6 @@ class BlockFinderTest extends GitTest {
   it should "find the innermost block" in {
     val commit = add("A.java", "public class A{\npublic void m(){\nif(true)\n{int x=3;}}}")
     val node = BlockFinder.findNode(Git.open(repo), commit.getName, "A.java", 4)
-    val root = node.getRoot.asInstanceOf[CompilationUnit]
-    root.getLineNumber(node.getStartPosition) should equal (4)
+    node.getLineNumber should equal (4)
   }
 }

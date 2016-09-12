@@ -1,7 +1,5 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.eclipse.jgit.api.Git
-
 class StatementChangeDetectorTest extends GitTest with NodeChangeDetectorTest {
 
   it should "find a statement change in two consecutive commits" in {

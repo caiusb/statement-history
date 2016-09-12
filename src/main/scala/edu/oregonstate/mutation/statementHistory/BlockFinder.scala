@@ -1,6 +1,8 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.eclipse.jdt.core.dom.{CompilationUnit, Block, ASTVisitor, ASTNode}
+import com.brindescu.gumtree.facade.{SuperBlock, SuperTree}
+import org.eclipse.jdt.core.dom.{ASTNode, ASTVisitor, Block, CompilationUnit}
+
 import scala.collection._
 
 object BlockFinder extends NodeFinder {
@@ -17,9 +19,8 @@ object BlockFinder extends NodeFinder {
     }
   }
 
-  override def getMapOfNodes(astRoot: ASTNode): immutable.Map[Int, ASTNode] = {
-    val visitor = new BlockVisitor
-    astRoot.accept(visitor)
-    immutable.Map() ++ visitor.blocks
+  override def getMapOfNodes(astRoot: SuperTree): immutable.Map[Int, SuperTree] = {
+    astRoot.listAllNodes.filter { _.isInstanceOf[SuperBlock] }
+      .flatMap{b => b.getSourceRange().map{ (_,b) }}.toMap
   }
 }

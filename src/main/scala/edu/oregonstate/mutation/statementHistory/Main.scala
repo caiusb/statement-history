@@ -3,10 +3,17 @@ package edu.oregonstate.mutation.statementHistory
 import java.io.{File, FileOutputStream, PrintStream}
 import java.util.logging.Level
 
+import com.brindescu.gumtree.facade.SuperTree
+import com.brindescu.gumtree.jdt.JavaTree
 import com.github.gumtreediff.matchers.Matcher
+import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 
+import com.brindescu.gumtree.facade.Gumtree._
+
 object Main {
+
+  private implicit def st(s: SuperTree): ASTNode = s.asInstanceOf[JavaTree]
 
   private[statementHistory] case class Config(method: Boolean = false,
                         block: Boolean = false,

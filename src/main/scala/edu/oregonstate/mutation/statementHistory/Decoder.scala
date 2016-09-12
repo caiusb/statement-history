@@ -2,12 +2,17 @@ package edu.oregonstate.mutation.statementHistory
 
 import java.io.File
 
+import com.brindescu.gumtree.facade.SuperTree
 import edu.oregonstate.mutation.statementHistory.JSONDecoder._
 import org.eclipse.jdt.core.dom.ASTNode
 
 import scala.io.Source
+import com.brindescu.gumtree.facade.Gumtree._
+import com.brindescu.gumtree.jdt.JavaTree
 
 trait Decoder {
+
+  private implicit def st(s: SuperTree): ASTNode = s.asInstanceOf[JavaTree]
 
   def decode(file: File) : Seq[StatementInfo] =
     Source.fromFile(file).getLines().map(decodeLine).toSeq
@@ -17,17 +22,17 @@ trait Decoder {
       decodeLine(line)
     }).toSeq
 
-  def decode(file: File, find: (String, Int) => ASTNode): Seq[StatementInfo] = {
+  def decode(file: File, find: (String, Int) => SuperTree): Seq[StatementInfo] = {
     val statements = Source.fromFile(file).getLines().map(decodeLine).toSeq
     computeExtraInfo(find, statements)
   }
 
-  def decode(json: String, find: (String, Int) => ASTNode) : Seq[StatementInfo] = {
+  def decode(json: String, find: (String, Int) => SuperTree) : Seq[StatementInfo] = {
     val statements = decode(json)
     computeExtraInfo(find, statements)
   }
 
-  private def computeExtraInfo(find: (String, Int) => ASTNode, statements: Seq[StatementInfo]): Seq[StatementInfo] = {
+  private def computeExtraInfo(find: (String, Int) => SuperTree, statements: Seq[StatementInfo]): Seq[StatementInfo] = {
     statements.foreach(s => {
       val node = find(s.getFileName, s.getLineNumber)
       s.computeOtherInfo(node)

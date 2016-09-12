@@ -1,21 +1,26 @@
 package edu.oregonstate.mutation.statementHistory
 
+import com.brindescu.gumtree.facade.Gumtree._
+import com.brindescu.gumtree.facade.SuperTree
+import com.brindescu.gumtree.jdt.JavaTree
 import org.eclipse.jdt.core.dom._
 
 class StatementInfo(private var fileName: String, private var lineNumber: Int, private var className: String) {
+
+  private implicit def st(s: SuperTree): ASTNode = s.asInstanceOf[JavaTree]
 
   private var otherInfo = ""
   private var nodeType = ""
   private var enclosingClass = ""
   private var enclosingMethod = ""
 
-  def this(file: String, node: ASTNode, lineNo: Int) {
+  def this(file: String, node: SuperTree, lineNo: Int) {
     this(file, lineNo, "")
     computeOtherInfo(node)
   }
 
-  def this(file: String, node: ASTNode) = {
-    this(file, node.getRoot.asInstanceOf[CompilationUnit].getLineNumber(node.getStartPosition), "")
+  def this(file: String, node: SuperTree) = {
+    this(file, node.getLineNumber, "")
     computeOtherInfo(node)
   }
 

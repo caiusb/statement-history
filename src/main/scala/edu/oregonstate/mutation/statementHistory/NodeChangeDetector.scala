@@ -92,7 +92,7 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
       actions
   }
 
-  private def getActionsTouchingNode(statement: ASTNode, actions: Seq[Action]): Seq[Action] = {
+  private def getActionsTouchingNode(statement: SuperTree, actions: Seq[Action]): Seq[Action] = {
     actions.filter(action => {
       val node = action.getNode.getASTNode
       isInNode(node, statement)
@@ -107,13 +107,13 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
     })
   }
 
-  private def getNextLine(astNode: ASTNode, diff: Diff, forwardInTime: Boolean): Int = {
+  private def getNextLine(astNode: SuperTree, diff: Diff, forwardInTime: Boolean): Int = {
     diff.getMatchedNodes.map{ case t => (t._1.getASTNode, t._2.getASTNode)}.foreach(
         _ match {
           case (x, s) if s == astNode && !forwardInTime =>
-            return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
+            return x.getLineNumber()
           case (s, x) if s == astNode && forwardInTime =>
-            return x.getRoot.asInstanceOf[CompilationUnit].getLineNumber(x.getStartPosition)
+            return x.getLineNumber()
           case _ => ;
         })
     return -1

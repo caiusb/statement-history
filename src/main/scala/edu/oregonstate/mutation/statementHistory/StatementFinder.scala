@@ -1,12 +1,11 @@
 package edu.oregonstate.mutation.statementHistory
 
-import org.eclipse.jdt.core.dom.{Statement, ASTNode}
+import com.brindescu.gumtree.facade.{SuperStatement, SuperTree}
 
 object StatementFinder extends NodeFinder {
 
-  override def getMapOfNodes(astRoot: ASTNode): Map[Int, Statement] = {
-    val visitor = new StatementVisitor()
-    astRoot.accept(visitor)
-    visitor.getStatementMap
+  override def getMapOfNodes(astRoot: SuperTree): Map[Int, SuperTree] = {
+    astRoot.listAllNodes.filter { _.isInstanceOf[SuperStatement] }
+        .flatMap{s => s.getSourceRange().map{ (_,s) }}.toMap
   }
 }

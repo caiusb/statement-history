@@ -1,33 +1,32 @@
 package edu.oregonstate.mutation.statementHistory
 
+import com.brindescu.gumtree.facade.SuperTree
 import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 
-import com.brindescu.gumtree.facade.Gumtree._
-
 trait NodeFinder {
 
-//  var parser: ASTParser
+  var parser: ASTParser = JavaParser
 
-  def findNode(git: Git, commitSHA: String, file: String, lineNumber: Int): ASTNode = {
+  def findNode(git: Git, commitSHA: String, file: String, lineNumber: Int): SuperTree = {
     val content: String = GitUtil.getFileContent(git, commitSHA, file)
-    val ast: ASTNode = JavaParser.parse(content)
+    val ast = parser.parse(content)
     findNode(lineNumber, ast)
   }
 
-  def findNode(lineNumber: Int, astRoot: ASTNode): ASTNode = {
-    val statementMap: Map[Int, ASTNode] = getMapOfNodes(astRoot)
+  def findNode(lineNumber: Int, astRoot: SuperTree): SuperTree = {
+    val statementMap: Map[Int, SuperTree] = getMapOfNodes(astRoot)
     statementMap.get(lineNumber) match {
       case Some(x) => return x
       case None => return null
     }
   }
 
-  def findAllNodesForFile(git: Git, commit: String, file: String): List[ASTNode] = {
+  def findAllNodesForFile(git: Git, commit: String, file: String): List[SuperTree] = {
     val content = GitUtil.getFileContent(git, commit, file)
     val ast = JavaParser.parse(content)
     getMapOfNodes(ast).values.toList
   }
 
-  def getMapOfNodes(astRoot: ASTNode): Map[Int, ASTNode]
+  def getMapOfNodes(astRoot: SuperTree): Map[Int, SuperTree]
 }

@@ -1,13 +1,18 @@
 package edu.oregonstate.mutation.statementHistory
 
+import com.brindescu.gumtree.facade.SuperTree
 import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.revwalk.RevCommit
+import com.brindescu.gumtree.facade.Gumtree._
+import com.brindescu.gumtree.jdt.JavaTree
 
 /**
  * Created by caius on 2/11/16.
  */
 class StatementInfoTest extends GitTest {
+
+  private implicit def st(s: SuperTree): ASTNode = s.asInstanceOf[JavaTree]
 
   private val FILE_NAME = "A.java"
 
@@ -15,7 +20,7 @@ class StatementInfoTest extends GitTest {
     "public class A{\npublic void m(){\n" + block + "\n{\nint x=3;}}}"
   }
 
-  def find(commit: RevCommit): ASTNode = {
+  def find(commit: RevCommit): SuperTree = {
     BlockFinder.findNode(Git.open(repo), commit.getName, FILE_NAME, 4)
   }
 
