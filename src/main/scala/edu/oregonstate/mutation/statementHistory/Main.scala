@@ -91,7 +91,7 @@ object Main {
       finder.findNode(git, config.commit, GitUtil.findFullPath(git, config.commit, name), number)
     val statements = config.statementFile match {
       case Some(x) => decoder.decode(x, find)
-      case None => getAllNodesInRepo(finder, config)
+      case None => getAllNodesInRepo(finder, config, if (config.c) ".c" else ".java")
     }
 
     val outputStream = config.file match {
