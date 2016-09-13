@@ -2,7 +2,7 @@ import sbt._
 
 name := "statement-history"
 
-version := "0.9.0-SNAPSHOT"
+version := "0.9.0"
 
 organization := "com.brindescu"
 
