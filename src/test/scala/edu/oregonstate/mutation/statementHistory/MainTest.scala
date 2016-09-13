@@ -4,9 +4,6 @@ import java.io.File
 
 import edu.oregonstate.mutation.statementHistory.Main.Config
 
-/**
- * Created by caius on 10/30/15.
- */
 class MainTest extends GitTest {
 
   private def parse(opts: String): Main.Config =
@@ -51,6 +48,16 @@ class MainTest extends GitTest {
   it should "find all the statements in the repo" in {
     add("A.java", "public class A{public void m(){int x=33;}}")
     add("B.java", "public class B{public void m(){int y=33;}}")
-    Main.getAllNodesInRepo(StatementFinder, new Config(repo = repo)) should have size 2
+    val finder = StatementFinder
+    finder.parser = JavaParser
+    Main.getAllNodesInRepo(finder, new Config(repo = repo)) should have size 2
+  }
+
+  it should "find all the C statements in the repo" in {
+    add("test.c", "void main(){int x=33;}")
+    add("test.c", "void main(){int y=33;}")
+    val finder = StatementFinder
+    finder.parser = CParser
+    Main.getAllNodesInRepo(finder, new Config(repo = repo), ".c") should have size 1
   }
 }

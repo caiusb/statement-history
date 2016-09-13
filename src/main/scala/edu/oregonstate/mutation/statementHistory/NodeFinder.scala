@@ -23,7 +23,7 @@ trait NodeFinder {
 
   def findAllNodesForFile(git: Git, commit: String, file: String): List[SuperTree] = {
     val content = GitUtil.getFileContent(git, commit, file)
-    val ast = JavaParser.parse(content)
+    val ast = parser.parse(content)
     getMapOfNodes(ast).values.toList
   }
 

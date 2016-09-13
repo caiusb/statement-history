@@ -33,7 +33,7 @@ class StatementInfo(private var fileName: String, private var lineNumber: Int, p
   }
 
   def findEnclosingClass(node: SuperTree): String = node.getEnclosingClass match {
-    case Some(x) => x.asInstanceOf[Named].getIdentifier()
+    case Some(x) => x.asInstanceOf[Named].getIdentifier
     case None => ""
   }
 

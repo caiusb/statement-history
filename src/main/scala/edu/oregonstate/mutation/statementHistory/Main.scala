@@ -4,7 +4,7 @@ import java.io.{File, FileOutputStream, PrintStream}
 import java.util.logging.Level
 
 import com.brindescu.gumtree.facade.Gumtree._
-import com.brindescu.gumtree.facade.SuperTree
+import com.brindescu.gumtree.facade.{CASTDiff, JavaASTDiff, SuperTree}
 import com.brindescu.gumtree.jdt.JavaTree
 import com.github.gumtreediff.matchers.Matcher
 import org.eclipse.jdt.core.dom.ASTNode
@@ -71,8 +71,17 @@ object Main {
     else
       StatementFinder
 
+    if (config.c)
+      finder.parser = CParser
+
     val git = Git.open(config.repo)
-    val detector = new NodeChangeDetector(git, finder)
+
+    val detector = if (config.c)
+      new NodeChangeDetector(git, finder, CASTDiff)
+    else
+      new NodeChangeDetector(git, finder, JavaASTDiff)
+
+
     val decoder = if (config.csvFile)
       CSVDecoder
     else
@@ -100,12 +109,14 @@ object Main {
     })
   }
 
-  private[statementHistory] def getAllNodesInRepo(finder: NodeFinder = StatementFinder, config: Config): Seq[StatementInfo] = {
+  private[statementHistory] def getAllNodesInRepo(finder: NodeFinder = StatementFinder,
+                                                  config: Config,
+                                                  extension: String = ".java"): Seq[StatementInfo] = {
     val git = Git.open(config.repo)
-    JavaFileFinder.findIn(git, config.commit)
+    FileFinder.findIn(git, config.commit, extension)
       .foldLeft[Seq[StatementInfo]](Seq())((list, file) => {
       list ++ finder.findAllNodesForFile(git, config.commit, file)
-        .map(node => new StatementInfo(file, node)).toSeq
+        .map(node => new StatementInfo(file, node))
     })
   }
 

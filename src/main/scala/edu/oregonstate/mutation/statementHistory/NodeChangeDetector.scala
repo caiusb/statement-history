@@ -1,16 +1,15 @@
 package edu.oregonstate.mutation.statementHistory
 
 import com.brindescu.gumtree.facade.Gumtree._
-import com.brindescu.gumtree.facade.{Diff, JavaASTDiff, SuperTree}
+import com.brindescu.gumtree.facade.{ASTDiff, Diff, JavaASTDiff, SuperTree}
 import com.brindescu.gumtree.jdt.JavaTree
 import com.github.gumtreediff.actions.model._
 import edu.oregonstate.mutation.statementHistory.Order._
 import org.eclipse.jdt.core.dom.ASTNode
 import org.eclipse.jgit.api.Git
 
-class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
-
-  private implicit def st(s: SuperTree): ASTNode = s.asInstanceOf[JavaTree]
+class NodeChangeDetector(private val git: Git, private val finder: NodeFinder,
+                         private val diffEngine: ASTDiff = JavaASTDiff) {
 
   def findCommits(filePath: String, lineNo: Int, commit: String = "HEAD", order: Value = BOTH): Seq[CommitInfo] = {
     val finder = new CommitFinder(git)
@@ -52,7 +51,7 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
 
     val (oldCommit, newCommit) = if (forwardInTime) (pair(0), pair(1)) else (pair(1), pair(0))
 
-    val diff = JavaASTDiff.getDiff(GitUtil.getFileContent(git, oldCommit, path), GitUtil.getFileContent(git, newCommit, path))
+    val diff = diffEngine.getDiff(GitUtil.getFileContent(git, oldCommit, path), GitUtil.getFileContent(git, newCommit, path))
 
     val oldTree = diff.getLeftTree()
     val newTree = diff.getRightTree()
@@ -119,11 +118,17 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder) {
     return -1
   }
 
-  def isInNode(node: ASTNode, target: ASTNode): Boolean = {
+  def isInNode(node: SuperTree, target: SuperTree): Boolean = {
     if (node == null)
       return false
     if (node.equals(target))
       return true
     isInNode(node.getParent, target)
   }
+
+  def isInNode(node: Option[SuperTree], target: SuperTree): Boolean =
+    node match {
+      case Some(x) => isInNode(x, target)
+      case None => false
+    }
 }

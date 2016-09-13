@@ -8,4 +8,5 @@ object StatementFinder extends NodeFinder {
     astRoot.listAllNodes.filter { _.isInstanceOf[SuperStatement] }
         .flatMap{s => s.getSourceRange().map{ (_,s) }}.toMap
   }
+
 }

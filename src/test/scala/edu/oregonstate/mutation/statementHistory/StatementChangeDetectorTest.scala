@@ -1,5 +1,7 @@
 package edu.oregonstate.mutation.statementHistory
 
+import com.brindescu.gumtree.facade.CASTDiff
+
 class StatementChangeDetectorTest extends GitTest with NodeChangeDetectorTest {
 
   it should "find a statement change in two consecutive commits" in {
@@ -211,6 +213,19 @@ class StatementChangeDetectorTest extends GitTest with NodeChangeDetectorTest {
     val expected = Seq(ci(first.getName, "ADD"), ci(third.getName, "UPDATE"))
 
     val commits = nd(git).findCommits("A.java", 3, first.getName, Order.BOTH)
+    commits should have size 2
+    commits should equal (expected)
+  }
+
+  it should "track a change across C files" in {
+    val first = add("test.c", "void main(){\nint x=3;\n}")
+    val second = add("test.c", "void main(){\nint y=32;\nint x=3;\n}")
+    val third = add("test.c", "void main(){\nint y=32;\nint x=7;\n}")
+    val expected = Seq(ci(first.getName, "ADD"), ci(third.getName, "UPDATE"))
+    val finder = StatementFinder
+    finder.parser = CParser
+    val nd = new NodeChangeDetector(git, finder, CASTDiff)
+    val commits = nd.findCommits("test.c", 2, first.getName, Order.BOTH)
     commits should have size 2
     commits should equal (expected)
   }
