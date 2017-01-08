@@ -14,6 +14,6 @@ class CommitInfoTest extends FlatSpec with Matchers {
   }
 
   it should "give the correct string" in {
-    new CommitInfo("abced", "ADD").toString should equal ("abced,ADD")
+    new CommitInfo("abced", "ADD").toString should equal ("[abced,ADD]")
   }
 }
