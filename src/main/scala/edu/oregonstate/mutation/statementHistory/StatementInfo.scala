@@ -2,7 +2,10 @@ package edu.oregonstate.mutation.statementHistory
 
 import com.brindescu.gumtree.facade.{Named, SuperBlock, SuperMethod, SuperTree}
 
-class StatementInfo(private var fileName: String, private var lineNumber: Int, private var className: String) {
+class StatementInfo(private var fileName: String,
+                    private var lineNumber: Int,
+                    private var className: String,
+                    private var sha: String = "HEAD") {
 
   private var otherInfo = ""
   private var nodeType = ""
