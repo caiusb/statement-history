@@ -3,7 +3,7 @@ package edu.oregonstate.mutation.statementHistory
 class CommitInfo(val sha: String, val action: String) {
 
   override def toString: String = {
-    return sha + "," + action
+    return "[" + sha + "," + action + "]"
   }
 
   override def equals(other: Any): Boolean = {
