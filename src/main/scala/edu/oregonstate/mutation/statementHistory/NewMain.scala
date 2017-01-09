@@ -6,6 +6,8 @@ import com.brindescu.gumtree.facade.JavaASTDiff
 import org.eclipse.jgit.api.Git
 import play.api.libs.json._
 
+import scala.collection.parallel.ForkJoinTaskSupport
+
 object NewMain extends App {
 
 	private case class Config(inputJSON: File = null,
@@ -67,9 +69,10 @@ object NewMain extends App {
 				  .filter { _.name.endsWith("java")})
 			})
 
-		commits.flatMap(c => c.files.map{(c.sha, _)})
-			.flatMap{ case (sha, f) => f.lines.map((sha, f.name, _))}.toParArray
-			.foreach { case (sha, f, l) =>
+		val parSeq = commits.flatMap(c => c.files.map {(c.sha, _)})
+			.flatMap { case (sha, f) => f.lines.map((sha, f.name, _)) }.par
+		parSeq.tasksupport = new ForkJoinTaskSupport()
+		parSeq.foreach { case (sha, f, l) =>
 					println(sha + "," + f + "," + l + "," + detector.findCommits(f, l, sha, Order.FORWARD).mkString(","))
 			}
 	}
