@@ -67,13 +67,10 @@ object NewMain extends App {
 				  .filter { _.name.endsWith("java")})
 			})
 
-		commits.toParArray.foreach(c => {
-			c.files.foreach(f => {
-				f.lines.foreach( l => {
-					println(c.sha  + "," + f.name + "," + l + "," + detector.findCommits(f.name, l, c.sha, Order.FORWARD))
-				})
-			})
-		})
+		commits.flatMap(c => c.files.map{(c.sha, _)})
+			.flatMap{ case (sha, f) => f.lines.map((sha, f.name, _))}.toParArray
+			.foreach { case (sha, f, l) =>
+					println(sha + "," + f + "," + l + "," + detector.findCommits(f, l, sha, Order.FORWARD).mkString(","))
+			}
 	}
-
 }
