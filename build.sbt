@@ -2,7 +2,7 @@ import sbt._
 
 name := "statement-history"
 
-version := "0.9.0"
+version := "0.9.1"
 
 organization := "com.brindescu"
 
@@ -30,7 +30,7 @@ resolvers ++= Seq(Resolver.sonatypeRepo("public"),
   "Snapshots" at "http://snapshots.ivy.brindescu.com"
 )
 
-val mc = Some("edu.oregonstate.mutation.statementHistory.Main")
+val mc = Some("edu.oregonstate.mutation.statementHistory.NewMain")
 
 mainClass in (Compile, run) := mc
 
