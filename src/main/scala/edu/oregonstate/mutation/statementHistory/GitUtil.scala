@@ -8,7 +8,7 @@ import org.eclipse.jgit.treewalk.filter.PathSuffixFilter
 import org.eclipse.jgit.util.io.DisabledOutputStream
 import org.gitective.core.{BlobUtils, CommitUtils}
 
-import scala.collection.JavaConversions
+import scala.collection.JavaConverters._
 
 object GitUtil {
 
@@ -20,20 +20,17 @@ object GitUtil {
     var secondTree: RevTree = null
     if (commit.getParentCount != 0)
       secondTree = commit.getParent(0).getTree
-    val diffs = diff.scan(secondTree, commit.getTree)
-    JavaConversions.asScalaBuffer(diffs)
+    diff.scan(secondTree, commit.getTree).asScala
   }
 
-  def getFileContent(git: Git, commitSHA: String, file: String): String = {
+  def getFileContent(git: Git, commitSHA: String, file: String): String =
     BlobUtils.getContent(git.getRepository, commitSHA, file) match {
       case x: Any => x
       case null => ""
     }
-  }
 
-  def getCommit(git: Git, sha: String): RevCommit = {
+  def getCommit(git: Git, sha: String): RevCommit =
     CommitUtils.getCommit(git.getRepository, sha)
-  }
 
   def findFullPath(git: Git, commitID: String, path: String): String =
     findFullPath(git, getCommit(git, commitID), path)
