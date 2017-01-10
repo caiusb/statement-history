@@ -35,15 +35,13 @@ class NodeChangeDetector(private val git: Git, private val finder: NodeFinder,
     beforeChanges ++ afterChanges
   }
 
-  def process(lineNo: Int, fullPath: String, commits: Seq[String], forwardInTime: Boolean): ChangeInfo = {
-    val lastBit = commits.sliding(2).foldLeft(new ChangeInfo(lineNo, List())) { (change, pair) =>
+  def process(lineNo: Int, fullPath: String, commits: Seq[String], forwardInTime: Boolean): ChangeInfo =
+    commits.sliding(2).foldLeft(new ChangeInfo(lineNo, List())) { (change, pair) =>
       processPair(pair, fullPath, change.getLine, forwardInTime) match {
         case Some(x) => change.merge(x)
         case None => change
       }
     }
-    lastBit
-  }
 
   private def processPair(pair: Seq[String], path: String, line: Int, forwardInTime: Boolean): Option[ChangeInfo] = {
     if (pair.size != 2)
