@@ -30,7 +30,7 @@ resolvers ++= Seq(Resolver.sonatypeRepo("public"),
   "Snapshots" at "http://snapshots.ivy.brindescu.com"
 )
 
-val mc = Some("edu.oregonstate.mutation.statementHistory.NewMain")
+val mc = Some("edu.oregonstate.mutation.statementHistory.Main")
 
 mainClass in (Compile, run) := mc
 
